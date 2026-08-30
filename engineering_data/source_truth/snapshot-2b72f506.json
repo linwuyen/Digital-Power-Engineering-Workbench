@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "extractor": "tools/extract_source_truth.py",
+  "snapshot_origin": "exact production files read at pinned commit through authorized GitHub connector",
+  "source_files": {
+    "system_state_h": "ASR5K_F28384D_CPU1/System_module/system_state.h",
+    "system_state_impl": "ASR5K_F28384D_CPU1/System_module/system_state_base.inc",
+    "host_queue": "ASR5K_F28384D_CPU1/Command_module/host_command_queue.h",
+    "spib_contract": "ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h",
+    "spib_diag": "ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h"
+  },
+  "facts": {
+    "system_states": [
+      {"name": "BOOT", "value": 0},
+      {"name": "INIT", "value": 1},
+      {"name": "IDLE", "value": 2},
+      {"name": "RUN", "value": 3},
+      {"name": "FAULT", "value": 4},
+      {"name": "MAINTENANCE", "value": 5},
+      {"name": "OTA", "value": 6}
+    ],
+    "fault_states": [
+      {"name": "CLEAR", "value": 0},
+      {"name": "ACTIVE", "value": 1},
+      {"name": "LATCHED", "value": 2},
+      {"name": "RECOVERY_WAIT", "value": 3}
+    ],
+    "power_sequence_states": [
+      {"name": "OFF", "value": 0},
+      {"name": "PRECHECK", "value": 1},
+      {"name": "AC_COMMAND", "value": 2},
+      {"name": "AC_ACK_WAIT", "value": 3},
+      {"name": "AC_QUALIFY", "value": 4},
+      {"name": "AC_BENCH_READY", "value": 5},
+      {"name": "PFC_COMMAND", "value": 6},
+      {"name": "PFC_ACK_WAIT", "value": 7},
+      {"name": "PFC_QUALIFY", "value": 8},
+      {"name": "DCDC_COMMAND", "value": 9},
+      {"name": "DCDC_ACK_WAIT", "value": 10},
+      {"name": "OUTPUT_COMMAND", "value": 11},
+      {"name": "OUTPUT_ACK_WAIT", "value": 12},
+      {"name": "RUN", "value": 13},
+      {"name": "SHUTDOWN_COMMAND", "value": 14},
+      {"name": "SHUTDOWN_ACK_WAIT", "value": 15},
+      {"name": "BLOCKED_POLICY", "value": 16},
+      {"name": "FAULT", "value": 17}
+    ],
+    "system_commands": [
+      {"name": "OUTPUT_ON", "value": 0},
+      {"name": "OUTPUT_OFF", "value": 1},
+      {"name": "DDS_PARAMETER", "value": 2},
+      {"name": "WAVE_UPDATE", "value": 3},
+      {"name": "CLEAR_FAULT", "value": 4},
+      {"name": "ENTER_MAINTENANCE", "value": 5},
+      {"name": "EXIT_MAINTENANCE", "value": 6},
+      {"name": "ENTER_OTA", "value": 7},
+      {"name": "COMPLETE_OTA", "value": 8},
+      {"name": "READ_STATUS", "value": 9}
+    ],
+    "fault_bitmap": [
+      {"name": "INIT", "mask": "0x00000001"},
+      {"name": "WAVE_MEMORY", "mask": "0x00000002"},
+      {"name": "DDS", "mask": "0x00000004"},
+      {"name": "HW_PROTECTION", "mask": "0x00000008"},
+      {"name": "M0", "mask": "0x00000010"},
+      {"name": "AM3352", "mask": "0x00000020"},
+      {"name": "CPU2", "mask": "0x00000040"},
+      {"name": "ISR_OVERRUN", "mask": "0x00000080"},
+      {"name": "PFC1_UVP", "mask": "0x00000100"},
+      {"name": "PFC1_OVP", "mask": "0x00000200"},
+      {"name": "PFC1_OTP", "mask": "0x00000400"},
+      {"name": "PFC2_UVP", "mask": "0x00000800"},
+      {"name": "PFC2_OVP", "mask": "0x00001000"},
+      {"name": "PFC2_OTP", "mask": "0x00002000"},
+      {"name": "DC_OVP", "mask": "0x00004000"},
+      {"name": "FAN1", "mask": "0x00008000"},
+      {"name": "FAN2", "mask": "0x00010000"},
+      {"name": "AC_INPUT", "mask": "0x00020000"},
+      {"name": "EXTERNAL", "mask": "0x80000000"}
+    ],
+    "timing_ms": {
+      "SYSTEM_AC_ACK_TIMEOUT": 500,
+      "SYSTEM_OUTPUT_ACK_TIMEOUT": 500,
+      "SYSTEM_OUTPUT_RELAY_SETTLE": 20,
+      "SYSTEM_OUTPUT_DDS_START_TIMEOUT": 500
+    },
+    "bench_gates": {
+      "ASR5K_CPU2_FAULT_BENCH_BYPASS": 1,
+      "ASR5K_AC_FAIL_BENCH_BYPASS": 1,
+      "ASR5K_DC_OVP_BENCH_BYPASS": 1,
+      "ASR5K_BENCH_BYPASS_M0_TIMEOUT": 1
+    },
+    "scalar_registers": {
+      "SPIB_CONTROL_FREQUENCY_SET_MSB_ADDR": "0x0910",
+      "SPIB_CONTROL_FREQUENCY_SET_LSB_ADDR": "0x0911",
+      "SPIB_CONTROL_FREQ_COMP_ON_OFF_ADDR": "0x0929",
+      "SPIB_CONTROL_DCV_SET_MSB_ADDR": "0x0939",
+      "SPIB_CONTROL_DCV_SET_LSB_ADDR": "0x093A",
+      "SPIB_CONTROL_ACV_SET_MSB_ADDR": "0x093B",
+      "SPIB_CONTROL_ACV_SET_LSB_ADDR": "0x093C"
+    },
+    "host_queue_depth": 8,
+    "host_command_types": [
+      {"name": "NONE", "value": 0},
+      {"name": "OUTPUT_SET", "value": 1},
+      {"name": "WAVEFORM_SET", "value": 2},
+      {"name": "MODE_SET", "value": 3},
+      {"name": "FREQUENCY_SET", "value": 4},
+      {"name": "DCV_SET", "value": 5},
+      {"name": "ACV_SET", "value": 6},
+      {"name": "VSLEW_SETTING_SET", "value": 7},
+      {"name": "VSLEW_MODE_SET", "value": 8}
+    ],
+    "spib_parser_diagnostic_threshold_ticks": [500, 1000]
+  },
+  "policy": {
+    "source_only": true,
+    "unknown_values_are_not_inferred": true,
+    "diagnostic_thresholds_are_not_deadlines": true,
+    "live_private_repo_recheck_requires_read_token": true
+  }
+}

@@ -8,6 +8,8 @@ on:
       - feat/workbench-v1-engineering
       - feat/engineering-data-source
       - feat/final-workbench-integration
+      - feat/engineering-memory-ssot
+      - feat/engineering-os-automation
   pull_request:
     branches:
       - main
@@ -18,7 +20,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,7 +34,7 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Python syntax
-        run: python -m py_compile server.py workbench/*.py tests/*.py
+        run: python -m py_compile server.py workbench/*.py tools/*.py tests/*.py
 
       - name: Engineering data JSON integrity
         run: |
@@ -44,8 +46,56 @@ jobs:
           for path in files:
               with path.open(encoding='utf-8') as f:
                   json.load(f)
-          print(f'validated {len(files)} engineering_data JSON files')
+          jsonl = sorted(Path('engineering_data').rglob('*.jsonl'))
+          for path in jsonl:
+              with path.open(encoding='utf-8') as f:
+                  for line_no, line in enumerate(f, 1):
+                      if line.strip():
+                          json.loads(line)
+          print(f'validated {len(files)} JSON and {len(jsonl)} JSONL files')
           PY
+
+      - name: Traceability resolves without orphan evidence
+        run: python tools/traceability.py --out /tmp/traceability.json
+
+      - name: HIL runner mock is explicitly non-qualifying
+        run: |
+          python tools/hil_runner.py --plan engineering_data/hil/reference_mock_plan.json --mode mock --out /tmp/hil-mock.json
+          python - <<'PY'
+          import json
+          with open('/tmp/hil-mock.json', encoding='utf-8') as f:
+              run = json.load(f)
+          assert run['result'] == 'SIMULATION_PASS'
+          assert run['qualification_claimed'] is False
+          PY
+
+      - name: Reject drift from pinned exact-source snapshot
+        run: |
+          python tools/verify_truth_drift.py \
+            --snapshot engineering_data/source_truth/snapshot-2b72f506.json \
+            --data-root engineering_data \
+            --report /tmp/truth-drift-pinned.json
+
+      - name: Optional live private ASR5K source recheck
+        env:
+          ASR5K_READ_TOKEN: ${{ secrets.ASR5K_READ_TOKEN }}
+        run: |
+          if [ -z "$ASR5K_READ_TOKEN" ]; then
+            echo "::notice::Live ASR5K source drift check SKIPPED: ASR5K_READ_TOKEN is not configured. Pinned exact-source snapshot check already passed."
+            exit 0
+          fi
+          rm -rf /tmp/asr5k
+          git clone --quiet --depth 1 --branch feat/voltage-slew-runtime-complete \
+            "https://x-access-token:${ASR5K_READ_TOKEN}@github.com/linwuyen/ASR5K_v2_28384.git" /tmp/asr5k
+          test "$(git -C /tmp/asr5k rev-parse HEAD)" = "2b72f50648d86c11547645882248eed69f12892f"
+          python tools/extract_source_truth.py \
+            --source-root /tmp/asr5k \
+            --baseline 2b72f50648d86c11547645882248eed69f12892f \
+            --out /tmp/asr5k-live-source-truth.json
+          python tools/verify_truth_drift.py \
+            --snapshot /tmp/asr5k-live-source-truth.json \
+            --data-root engineering_data \
+            --report /tmp/truth-drift-live.json
 
       - name: Browser JavaScript syntax
         run: |

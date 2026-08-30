@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.3",
   "dataset": "ASR5K engineering truth index",
-  "generated_utc": "2026-08-30T14:08:00Z",
+  "generated_utc": "2026-08-31T00:39:00+08:00",
   "baseline": {
     "repository": "linwuyen/ASR5K_v2_28384",
     "branch": "feat/voltage-slew-runtime-complete",
@@ -41,18 +41,36 @@
     "signal_dictionary": "hardware/signal_dictionary.json",
     "timing_budget": "timing/timing_budget.json",
     "protection_matrix": "protection/protection_matrix.json",
-    "evidence_ledger": "evidence/evidence_ledger.jsonl"
+    "evidence_ledger": "evidence/evidence_ledger.jsonl",
+    "source_truth_extractor_contract": "source_truth/extractor_contract.json",
+    "source_truth_snapshot": "source_truth/snapshot-2b72f506.json",
+    "hil_test_catalog": "hil/hil_test_catalog.json",
+    "hil_reference_mock_plan": "hil/reference_mock_plan.json"
+  },
+  "automation": {
+    "source_truth_extractor": "../tools/extract_source_truth.py",
+    "drift_detector": "../tools/verify_truth_drift.py",
+    "evidence_importer": "../tools/import_evidence.py",
+    "traceability_engine": "../tools/traceability.py",
+    "hil_runner": "../tools/hil_runner.py"
   },
   "human_views": {
-    "current_status": "../docs/CURRENT_STATUS.md"
+    "current_status": "../docs/CURRENT_STATUS.md",
+    "engineering_os_automation": "../docs/ENGINEERING_OS_AUTOMATION.md"
   },
   "consumer_policy": {
     "unknown_value": "null",
     "unknown_action": "fail_closed_or_request_verification",
     "source_conflict_action": "report_conflict",
+    "source_verified_drift_action": "ci_fail",
     "browser_safety_authority": false,
     "production_repository_mutated": false,
     "pass_claim_requires_evidence_ledger_record": true,
-    "test_file_presence_is_pass": false
+    "test_file_presence_is_pass": false,
+    "simulation_pass_is_qualification_pass": false,
+    "pinned_source_snapshot_check_required": true,
+    "live_private_source_check_requires_secret": true,
+    "live_private_source_check_secret_name": "ASR5K_READ_TOKEN",
+    "missing_live_private_source_secret_action": "explicit_skip_without_live_claim"
   }
 }

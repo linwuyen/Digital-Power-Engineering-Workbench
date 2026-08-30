@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K HIL test catalog",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "runner": "tools/hil_runner.py",
+  "authority_policy": {
+    "harness_role": "host intent and observation only",
+    "browser_or_host_protection_authority": false,
+    "dut_local_protection_required": true,
+    "simulation_pass_is_qualification_pass": false,
+    "hardware_run_requires_evidence_import": true
+  },
+  "tests": [
+    {
+      "id": "HIL-SPIB-NEXT-RESPONSE-001",
+      "requirements": ["REQ-SPIB-001", "REQ-SPIB-002"],
+      "objective": "Verify a complete SPIB request is decoded and its response becomes observable on the following master transaction.",
+      "required_fixture": "CPU1 DUT plus CPU2 or AM3352 host with physical SPI/GPIO wiring",
+      "required_evidence": ["exact CPU1 build artifact hash", "host build/version", "logic-analyzer or timestamp trace", "request/response frame log"],
+      "status": "pending_hardware"
+    },
+    {
+      "id": "HIL-SPIB-NULL-FRAME-001",
+      "requirements": ["REQ-SPIB-003"],
+      "objective": "Verify 0xFFFF0000 behaves as the production NULL/fetch frame without creating an unintended control intent.",
+      "required_fixture": "CPU1 DUT plus physical SPI master",
+      "required_evidence": ["exact DUT artifact hash", "wire trace", "command-queue diagnostic before/after"],
+      "status": "pending_hardware"
+    },
+    {
+      "id": "HIL-OUTPUT-FAULT-AUTHORITY-001",
+      "requirements": ["REQ-AUTH-001", "REQ-PROT-001", "REQ-QUAL-001"],
+      "objective": "Demonstrate DUT-local protection/fault authority dominates host OUTPUT_ON intent and reaches a safe physical output independently of host acknowledgement.",
+      "required_fixture": "qualified fault-injection setup and independent scope/DAQ observation",
+      "required_evidence": ["stimulus identity", "fault detector path", "PWM/output observation", "measured shutdown latency", "exact DUT artifact hash"],
+      "status": "pending_hardware"
+    },
+    {
+      "id": "HIL-HOST-AB-001",
+      "requirements": ["REQ-QUAL-001"],
+      "objective": "Run the same CPU1 baseline against CPU2 host simulator and real AM3352 and compare protocol/state results.",
+      "required_fixture": "same CPU1 DUT baseline, CPU2 host fixture, real AM3352 host",
+      "required_evidence": ["CPU1 artifact hash", "CPU2 host artifact hash", "AM3352 version", "A/B command and response logs", "difference report"],
+      "status": "pending_hardware"
+    }
+  ]
+}

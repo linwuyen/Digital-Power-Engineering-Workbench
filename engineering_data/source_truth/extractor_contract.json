@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K source truth extraction contract",
+  "baseline": {
+    "repository": "linwuyen/ASR5K_v2_28384",
+    "branch": "feat/voltage-slew-runtime-complete",
+    "commit": "2b72f50648d86c11547645882248eed69f12892f"
+  },
+  "extractor": "tools/extract_source_truth.py",
+  "drift_detector": "tools/verify_truth_drift.py",
+  "authoritative_source_files": [
+    "ASR5K_F28384D_CPU1/System_module/system_state.h",
+    "ASR5K_F28384D_CPU1/System_module/system_state_base.inc",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_queue.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h"
+  ],
+  "source_verified_fact_classes": [
+    "SystemState enum vocabulary",
+    "FaultState enum vocabulary",
+    "Power sequence enum vocabulary",
+    "System command enum vocabulary",
+    "fault bitmap masks",
+    "software timeout/settle constants",
+    "temporary bench gates",
+    "authoritative scalar register addresses",
+    "host intent queue depth/types",
+    "SPIB parser diagnostic threshold identifiers"
+  ],
+  "explicit_exclusions": [
+    "ADC analog scaling not proven by the selected sources",
+    "formal SPIB acceptance deadline",
+    "hardware protection shutdown latency",
+    "board/HIL/AM3352 qualification",
+    "production control plant/SFRA measurements"
+  ],
+  "drift_policy": {
+    "source_verified_mismatch": "CI_FAIL",
+    "pending_value": "DO_NOT_COMPARE_UNTIL_PROMOTED",
+    "diagnostic_threshold_is_deadline": false,
+    "production_repository_access": "read_only"
+  }
+}
