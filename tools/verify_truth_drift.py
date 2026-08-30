@@ -20,12 +20,16 @@ TIMING_BINDINGS = {
 }
 
 
+def norm_hex(value: str, width: int) -> str:
+    return f"0x{int(str(value), 16):0{width}X}"
+
+
 def _state_rows(state: dict) -> list[dict]:
     return [{"name": row["id"], "value": row["value"]} for row in state["system_states"]]
 
 
 def _fault_rows(protection: dict) -> list[dict]:
-    return [{"name": row["name"], "mask": row["mask"].upper()} for row in protection["fault_sources"]]
+    return [{"name": row["name"], "mask": norm_hex(row["mask"], 8)} for row in protection["fault_sources"]]
 
 
 def compare(snapshot: dict, data_root: str | Path) -> dict:
@@ -82,14 +86,14 @@ def compare(snapshot: dict, data_root: str | Path) -> dict:
     for intent, macro_names in REGISTER_BINDINGS.items():
         check(
             f"registers.{intent}",
-            [registers[name] for name in macro_names],
-            [value.upper() for value in by_name[intent]["wire_addresses"]],
+            [norm_hex(registers[name], 4) for name in macro_names],
+            [norm_hex(value, 4) for value in by_name[intent]["wire_addresses"]],
         )
     freq_comp = next(row for row in commands["additional_verified_registers"] if row["name"] == "FREQ_COMP_ON_OFF")
     check(
         "registers.FREQ_COMP_ON_OFF",
-        registers["SPIB_CONTROL_FREQ_COMP_ON_OFF_ADDR"],
-        freq_comp["address"].upper(),
+        norm_hex(registers["SPIB_CONTROL_FREQ_COMP_ON_OFF_ADDR"], 4),
+        norm_hex(freq_comp["address"], 4),
     )
 
     return {
