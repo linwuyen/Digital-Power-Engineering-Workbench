@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feat/workbench-mvp
+      - feat/workbench-v1-engineering
   pull_request:
     branches:
       - main
@@ -35,3 +36,8 @@ jobs:
         run: |
           node --check static/app.js
           node --check static/i18n.js
+          node --check static/eng/loader.js
+          node --check static/eng/common.js
+          node --check static/eng/profiles.js
+          node --check static/eng/control_sfra.js
+          node --check static/eng/system_tools.js
