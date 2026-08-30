@@ -81,7 +81,7 @@ class EngineeringOsAutomationTest(unittest.TestCase):
             "baseline": BASELINE,
             "facts": {
                 "system_states": [{"name": row["id"], "value": row["value"]} for row in state["system_states"]],
-                "fault_bitmap": [{"name": row["name"], "mask": row["mask"].upper()} for row in protection["fault_sources"]],
+                "fault_bitmap": [{"name": row["name"], "mask": f"0x{int(row['mask'], 16):08X}"} for row in protection["fault_sources"]],
                 "bench_gates": {row["name"]: int(row["value"]) for row in protection["temporary_baseline_gates"]},
                 "timing_ms": {
                     "SYSTEM_AC_ACK_TIMEOUT": budgets["SYSTEM_AC_ACK_TIMEOUT"],
