@@ -1,0 +1,35 @@
+name: Workbench CI
+
+on:
+  push:
+    branches:
+      - main
+      - feat/workbench-mvp
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Python regression
+        run: python -m unittest discover -s tests -v
+
+      - name: Python syntax
+        run: python -m py_compile server.py workbench/*.py
+
+      - name: Browser JavaScript syntax
+        run: node --check static/app.js
