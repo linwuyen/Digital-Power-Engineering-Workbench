@@ -69,21 +69,33 @@ jobs:
           assert run['qualification_claimed'] is False
           PY
 
-      - name: Clone pinned ASR5K production baseline read-only
+      - name: Reject drift from pinned exact-source snapshot
         run: |
-          git clone --depth 1 --branch feat/voltage-slew-runtime-complete https://github.com/linwuyen/ASR5K_v2_28384.git /tmp/asr5k
-          test "$(git -C /tmp/asr5k rev-parse HEAD)" = "2b72f50648d86c11547645882248eed69f12892f"
+          python tools/verify_truth_drift.py \
+            --snapshot engineering_data/source_truth/snapshot-2b72f506.json \
+            --data-root engineering_data \
+            --report /tmp/truth-drift-pinned.json
 
-      - name: Extract production source truth and reject drift
+      - name: Optional live private ASR5K source recheck
+        env:
+          ASR5K_READ_TOKEN: ${{ secrets.ASR5K_READ_TOKEN }}
         run: |
+          if [ -z "$ASR5K_READ_TOKEN" ]; then
+            echo "::notice::Live ASR5K source drift check SKIPPED: ASR5K_READ_TOKEN is not configured. Pinned exact-source snapshot check already passed."
+            exit 0
+          fi
+          rm -rf /tmp/asr5k
+          git clone --quiet --depth 1 --branch feat/voltage-slew-runtime-complete \
+            "https://x-access-token:${ASR5K_READ_TOKEN}@github.com/linwuyen/ASR5K_v2_28384.git" /tmp/asr5k
+          test "$(git -C /tmp/asr5k rev-parse HEAD)" = "2b72f50648d86c11547645882248eed69f12892f"
           python tools/extract_source_truth.py \
             --source-root /tmp/asr5k \
             --baseline 2b72f50648d86c11547645882248eed69f12892f \
-            --out /tmp/asr5k-source-truth.json
+            --out /tmp/asr5k-live-source-truth.json
           python tools/verify_truth_drift.py \
-            --snapshot /tmp/asr5k-source-truth.json \
+            --snapshot /tmp/asr5k-live-source-truth.json \
             --data-root engineering_data \
-            --report /tmp/truth-drift.json
+            --report /tmp/truth-drift-live.json
 
       - name: Browser JavaScript syntax
         run: |
