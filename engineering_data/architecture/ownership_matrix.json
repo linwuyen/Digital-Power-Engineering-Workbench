@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "facts": [
+    {"resource":"SystemState/top-level transitions","decision_owner":"CPU1","physical_owner":"CPU1","m0_role":"observation/telemetry","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"resource":"Host command admission/queue/dispatch","decision_owner":"CPU1","physical_owner":null,"m0_role":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/Command_module/host_command_admission.h; host_command_queue.h; host_command_controller.h"},
+    {"resource":"SPIB host transport","decision_owner":"CPU1","physical_owner":"CPU1 SPIB peripheral","m0_role":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/cmd_parser.h; spi_slave.h"},
+    {"resource":"DDS/waveform/DC-AC scalar derivation","decision_owner":"CPU1","physical_owner":"CPU1","m0_role":"no duplicate owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"DCAC local control/immediate local safe action","decision_owner":"CPU1","physical_owner":"CPU1","m0_role":"no duplicate owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"PFC/DCDC/AC_OCPA physical GPIO","decision_owner":"CPU1 request/policy","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"OUT_ON physical relay GPIO","decision_owner":"CPU1 request/policy","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"Fan PWM/tach physical service","decision_owner":"CPU1 command/status consumer","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"DAC7612 physical serial transaction","decision_owner":"CPU1 threshold-value producer","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"M0 protection GPIO acquisition/decode","decision_owner":"CPU1 telemetry consumer","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"Critical physical shutdown timing","decision_owner":"CPU1 coordination/local cleanup","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"C28 local CMPSS/TZ/ISR protection","decision_owner":"CPU1","physical_owner":"CPU1","m0_role":"must not duplicate","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"Requested command image","decision_owner":"CPU1","physical_owner":null,"m0_role":"consume","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"resource":"Applied output image / physical ACK","decision_owner":"CPU1 consume","physical_owner":"MSPM0","m0_role":"owner","trust":"governance_contract","source":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"}
+  ],
+  "invariant":"A physical actuator or critical timing engine has one owner only.",
+  "conflict_policy":"Exact production/design source wins; report conflicts before changing ownership."
+}
