@@ -11,6 +11,20 @@
 
 The Digital Power Engineering Workbench software stack is integrated and published from `main` through GitHub Pages. The browser application consumes `engineering_data/` directly and uses a fail-closed trust model: unknown production values are shown as pending instead of being substituted with demo values.
 
+## Engineering OS automation state
+
+The automation framework is implemented for:
+
+- source-truth extraction from an exact ASR5K checkout;
+- canonical source-truth drift detection;
+- evidence validation/import into the append-only ledger;
+- requirement-to-evidence traceability resolution;
+- host-intent-only HIL sequence execution with MOCK and local-process gateway modes.
+
+CI always verifies the commit-pinned source snapshot `engineering_data/source_truth/snapshot-2b72f506.json` against canonical engineering data. A live re-extraction from the private ASR5K repository is also implemented, but it runs only when a read-only repository secret named `ASR5K_READ_TOKEN` is configured. Without that secret CI reports the live check as explicitly **SKIPPED**; it is not a live-source PASS claim.
+
+HIL framework availability is not hardware qualification. Mock runs are `SIMULATION_PASS`; physical process runs remain `HARDWARE_RUN_PASS_UNQUALIFIED` until exact artifact/instrument evidence is imported and linked to requirements.
+
 ## Source-verified production facts
 
 - CPU1 SystemState vocabulary: `BOOT`, `INIT`, `IDLE`, `RUN`, `FAULT`, `MAINTENANCE`, `OTA`.
@@ -33,6 +47,8 @@ The Digital Power Engineering Workbench software stack is integrated and publish
 - Protection, PWM Trip and emergency safe-off authority remain local to firmware/hardware.
 - Detection authority, shutdown authority, state-policy ownership and host visibility are modeled separately.
 - A source file or test file existing does not prove a PASS run.
+- Source-verified fact drift is a CI blocker.
+- Exact-baseline PASS evidence is required before traceability can promote a requirement to `QUALIFIED_BY_EVIDENCE`.
 
 ## Explicit pending verification
 
@@ -49,6 +65,7 @@ The following are intentionally **not** promoted to production truth:
 - Production PFC / PSFB / LLC plant, controller and SFRA operating-point package.
 - CPU1 / CPU2 / M0 exact-baseline build PASS records.
 - Board HIL and real-AM3352 A/B qualification records.
+- Live private-repository source recheck until `ASR5K_READ_TOKEN` is configured and a CI run actually executes it.
 
 ## Canonical data sources
 
@@ -61,6 +78,18 @@ The highest-value engineering-memory sources are:
 - `engineering_data/timing/timing_budget.json` — software timing constants, formal-deadline placeholders, measured-WCET fields and evidence requirements.
 - `engineering_data/protection/protection_matrix.json` — fault bitmap, detection/shutdown authority and qualification gaps.
 - `engineering_data/evidence/evidence_ledger.jsonl` — append-only evidence contract for exact run/artifact PASS records.
+- `engineering_data/source_truth/snapshot-2b72f506.json` — commit-pinned high-confidence source fact snapshot used by the always-on drift gate.
+- `engineering_data/hil/hil_test_catalog.json` — hardware/HIL qualification objectives and required evidence.
+
+## Automation tools
+
+- `tools/extract_source_truth.py`
+- `tools/verify_truth_drift.py`
+- `tools/import_evidence.py`
+- `tools/traceability.py`
+- `tools/hil_runner.py`
+
+See `docs/ENGINEERING_OS_AUTOMATION.md` for operating instructions and private-repository CI behavior.
 
 ## Definition of Done
 
