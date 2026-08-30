@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K timing budget and evidence contract",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "budgets": [
+    {
+      "id": "SYSTEM_AC_ACK_TIMEOUT",
+      "path": "system_sequence",
+      "budget": 500,
+      "unit": "ms",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "software_timeout_ceiling",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SYSTEM_OUTPUT_ACK_TIMEOUT",
+      "path": "system_sequence",
+      "budget": 500,
+      "unit": "ms",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "software_timeout_ceiling",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SYSTEM_OUTPUT_RELAY_SETTLE",
+      "path": "system_sequence",
+      "budget": 20,
+      "unit": "ms",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "software_settle_interval",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SYSTEM_OUTPUT_DDS_START_TIMEOUT",
+      "path": "system_sequence",
+      "budget": 500,
+      "unit": "ms",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "command_liveness_ceiling_not_hardware_performance",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SPIB_PARSER_500_TICK_DIAGNOSTIC",
+      "path": "SPIB_parser",
+      "budget": 500,
+      "unit": "CPU timer ticks",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "diagnostic_threshold_not_acceptance_deadline",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SPIB_PARSER_1000_TICK_DIAGNOSTIC",
+      "path": "SPIB_parser",
+      "budget": 1000,
+      "unit": "CPU timer ticks",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "diagnostic_threshold_not_acceptance_deadline",
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/timing_budget.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "SPIB_RESPONSE_DEADLINE",
+      "path": "master_edge_to_response_ready",
+      "budget": null,
+      "unit": "CPU timer ticks",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "formal_acceptance_deadline",
+      "trust": "pending_verification",
+      "required_evidence": ["authoritative numeric acceptance limit", "exact baseline timing run", "worst-case path identity"],
+      "evidence_refs": []
+    },
+    {
+      "id": "CONTROL_ISR_PERIOD",
+      "path": "control_ISR",
+      "budget": null,
+      "unit": "us",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "production_period",
+      "trust": "pending_verification",
+      "required_evidence": ["exact production timer/PWM trigger source", "ISR ownership confirmation"],
+      "evidence_refs": []
+    },
+    {
+      "id": "HARDWARE_PROTECTION_SHUTDOWN_LATENCY",
+      "path": "fault_detection_to_safe_physical_output",
+      "budget": null,
+      "unit": "us",
+      "measured_worst_case": null,
+      "margin": null,
+      "classification": "safety_latency",
+      "trust": "pending_verification",
+      "required_evidence": ["exact detector and trip path", "scope or DAQ measurement", "stimulus identity", "baseline and board identity"],
+      "evidence_refs": []
+    }
+  ],
+  "rules": [
+    "Diagnostic thresholds are not formal deadlines.",
+    "Software timeouts are not hardware response specifications.",
+    "margin may only be computed when both an authoritative budget and measured worst-case value exist.",
+    "A timing PASS requires an evidence record bound to exact baseline, artifact and test identity."
+  ]
+}
