@@ -4,6 +4,7 @@ from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 import json
 import os
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 from workbench.control import BuckPlantConfig, ControlError, analyze_buck_pi
 from workbench.control_advanced import AdvancedControlError, PlantModel, PoleZeroController, analyze_pole_zero_loop
@@ -18,6 +19,7 @@ from workbench.validation import ValidationError, run_sequence
 
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
+ENGINEERING_DATA = ROOT / "engineering_data"
 REMOTE = SafeMockPowerSupply()
 
 
@@ -43,7 +45,43 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             raise ValueError("JSON body must be an object")
         return data
 
+    def _serve_engineering_data(self) -> bool:
+        parsed = urlsplit(self.path)
+        prefix = "/engineering_data/"
+        if not parsed.path.startswith(prefix):
+            return False
+
+        relative = unquote(parsed.path[len(prefix):])
+        candidate = (ENGINEERING_DATA / relative).resolve()
+        try:
+            candidate.relative_to(ENGINEERING_DATA.resolve())
+        except ValueError:
+            self.send_error(403, "invalid engineering_data path")
+            return True
+
+        if not candidate.is_file():
+            self.send_error(404, "engineering_data resource not found")
+            return True
+
+        suffix = candidate.suffix.lower()
+        content_type = {
+            ".json": "application/json; charset=utf-8",
+            ".md": "text/markdown; charset=utf-8",
+            ".txt": "text/plain; charset=utf-8",
+        }.get(suffix, "application/octet-stream")
+        body = candidate.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        self.wfile.write(body)
+        return True
+
     def do_GET(self):
+        if self._serve_engineering_data():
+            return
         if self.path == "/api/health":
             return self._json(200, {"ok": True, "service": "digital-power-engineering-workbench", "version": "1.0-engineering"})
         if self.path == "/api/state-machine":
