@@ -67,6 +67,20 @@ def _logspace(start_hz: float, stop_hz: float, count: int) -> list[float]:
     return [10 ** (a + (b - a) * i / (count - 1)) for i in range(count)]
 
 
+def _unwrap_phase_deg(values: list[float]) -> list[float]:
+    if not values:
+        return []
+    result = [values[0]]
+    for value in values[1:]:
+        previous = result[-1]
+        while value - previous > 180.0:
+            value -= 360.0
+        while value - previous < -180.0:
+            value += 360.0
+        result.append(value)
+    return result
+
+
 def _buck_gvd(s: complex, cfg: BuckPlantConfig) -> complex:
     # Ideal CCM buck, voltage-mode control-to-output plant.
     denominator = cfg.inductance_h * cfg.capacitance_f * s * s + (cfg.inductance_h / cfg.load_ohm) * s + 1.0
@@ -93,7 +107,7 @@ def analyze_buck_pi(cfg: BuckPlantConfig, points: int = 160) -> dict:
     plant_mag_db: list[float] = []
     plant_phase_deg: list[float] = []
     loop_mag_db: list[float] = []
-    loop_phase_deg: list[float] = []
+    loop_phase_raw_deg: list[float] = []
 
     delay_s = cfg.delay_samples / cfg.sampling_hz
     for f in freqs:
@@ -107,8 +121,9 @@ def analyze_buck_pi(cfg: BuckPlantConfig, points: int = 160) -> dict:
         plant_mag_db.append(20.0 * math.log10(max(abs(plant), 1e-30)))
         plant_phase_deg.append(math.degrees(cmath.phase(plant)))
         loop_mag_db.append(20.0 * math.log10(max(abs(loop), 1e-30)))
-        loop_phase_deg.append(math.degrees(cmath.phase(loop)))
+        loop_phase_raw_deg.append(math.degrees(cmath.phase(loop)))
 
+    loop_phase_deg = _unwrap_phase_deg(loop_phase_raw_deg)
     crossover_hz = None
     phase_margin_deg = None
     for i in range(1, len(freqs)):
@@ -136,6 +151,8 @@ def analyze_buck_pi(cfg: BuckPlantConfig, points: int = 160) -> dict:
             warnings.append("Crossover exceeds fsw/10; averaged plant assumptions may be weak.")
     if phase_margin_deg is not None and phase_margin_deg < 45.0:
         warnings.append("Phase margin is below 45 degrees.")
+    if phase_margin_deg is not None and phase_margin_deg <= 0.0:
+        warnings.append("Computed phase margin is non-positive; do not apply these gains to hardware without loop re-design and measured verification.")
 
     return {
         "resonance_hz": resonance_hz,
