@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K protection authority and evidence matrix",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "fault_bitmap_source": "engineering_data/firmware/protection_matrix.json",
+  "fault_sources": [
+    {"name":"INIT","mask":"0x00000001","trust":"verified_source"},
+    {"name":"WAVE_MEMORY","mask":"0x00000002","trust":"verified_source"},
+    {"name":"DDS","mask":"0x00000004","trust":"verified_source"},
+    {"name":"HW_PROTECTION","mask":"0x00000008","trust":"verified_source"},
+    {"name":"M0","mask":"0x00000010","trust":"verified_source"},
+    {"name":"AM3352","mask":"0x00000020","trust":"verified_source"},
+    {"name":"CPU2","mask":"0x00000040","trust":"verified_source"},
+    {"name":"ISR_OVERRUN","mask":"0x00000080","trust":"verified_source"},
+    {"name":"PFC1_UVP","mask":"0x00000100","trust":"verified_source"},
+    {"name":"PFC1_OVP","mask":"0x00000200","trust":"verified_source"},
+    {"name":"PFC1_OTP","mask":"0x00000400","trust":"verified_source"},
+    {"name":"PFC2_UVP","mask":"0x00000800","trust":"verified_source"},
+    {"name":"PFC2_OVP","mask":"0x00001000","trust":"verified_source"},
+    {"name":"PFC2_OTP","mask":"0x00002000","trust":"verified_source"},
+    {"name":"DC_OVP","mask":"0x00004000","trust":"verified_source"},
+    {"name":"FAN1","mask":"0x00008000","trust":"verified_source"},
+    {"name":"FAN2","mask":"0x00010000","trust":"verified_source"},
+    {"name":"AC_INPUT","mask":"0x00020000","trust":"verified_source"},
+    {"name":"EXTERNAL","mask":"0x80000000","trust":"verified_source"}
+  ],
+  "protection_paths": [
+    {
+      "id": "AC_INPUT_CLASSIFICATION",
+      "fault_class": "input_qualification",
+      "signal": "GPIO8 / ECAP1",
+      "threshold": {"frequency_min_hz":45.0,"frequency_max_hz":65.0,"duty_min_percent":10.0,"duty_max_percent":90.0,"confirmation_samples":3},
+      "detection_authority": "CPU1 AcInputMonitor",
+      "shutdown_authority": null,
+      "latch_owner": null,
+      "host_visibility": "through system fault/status path",
+      "clear_condition": null,
+      "latency_us": null,
+      "trust": "verified_source",
+      "source_ref": "engineering_data/firmware/protection_matrix.json",
+      "evidence_refs": []
+    },
+    {
+      "id": "C28_LOCAL_HW_PROTECTION",
+      "fault_class": "hardware_protection",
+      "signal": null,
+      "threshold": null,
+      "detection_authority": "CPU1 C28 local CMPSS/TZ/ISR",
+      "shutdown_authority": "CPU1 local protection path",
+      "latch_owner": "CPU1 SystemState/fault policy where applicable",
+      "host_visibility": "fault/status telemetry path",
+      "clear_condition": null,
+      "latency_us": null,
+      "trust": "governance_contract",
+      "verification": "pending_verification",
+      "required_evidence": ["exact electrical threshold", "exact detector-to-Trip routing", "PWM modules affected", "board-measured shutdown latency"],
+      "evidence_refs": []
+    },
+    {
+      "id": "M0_PHYSICAL_PROTECTION",
+      "fault_class": "physical_protection",
+      "signal": null,
+      "threshold": null,
+      "detection_authority": "MSPM0 protection GPIO acquisition/decode",
+      "shutdown_authority": "MSPM0 critical physical shutdown timing",
+      "latch_owner": null,
+      "host_visibility": "through CPU1/M0 fault reporting path",
+      "clear_condition": null,
+      "latency_us": null,
+      "trust": "governance_contract",
+      "verification": "pending_verification",
+      "required_evidence": ["exact M0 source path at selected baseline", "schematic/net identity", "board-measured shutdown latency"],
+      "evidence_refs": []
+    }
+  ],
+  "temporary_baseline_gates": [
+    {"name":"ASR5K_CPU2_FAULT_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_AC_FAIL_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_DC_OVP_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_BENCH_BYPASS_M0_TIMEOUT","value":1,"trust":"verified_source"}
+  ],
+  "rules": [
+    "Detection authority and shutdown authority are separate fields and must not be conflated.",
+    "Bench bypasses are baseline facts, not authorization to disable raw diagnostics or hardware protection.",
+    "A software fault bit does not by itself prove the electrical threshold or physical shutdown latency.",
+    "Unknown threshold, latch, clear and latency fields remain null until evidence exists."
+  ]
+}

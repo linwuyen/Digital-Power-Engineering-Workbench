@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K requirement traceability ledger",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "status_model": ["verified_source", "governance_contract", "pending_verification", "not_claimed"],
+  "requirements": [
+    {
+      "id": "REQ-SPIB-001",
+      "requirement": "CPU1 SPIB NORMAL shall decode one complete 32-bit request as 16-bit address plus 16-bit data.",
+      "owner": "CPU1 SPIB",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/protocol/host_protocol.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_only"
+    },
+    {
+      "id": "REQ-SPIB-002",
+      "requirement": "The response for an accepted SPIB NORMAL request is returned on the next master transaction.",
+      "owner": "CPU1 SPIB",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/protocol/host_protocol.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_only"
+    },
+    {
+      "id": "REQ-SPIB-003",
+      "requirement": "0xFFFF0000 is the production NULL/fetch frame value for the extracted SPIB NORMAL contract.",
+      "owner": "CPU1 SPIB",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/protocol/host_protocol.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_only"
+    },
+    {
+      "id": "REQ-HOST-001",
+      "requirement": "The extracted Host Command intent queue depth is 8 entries.",
+      "owner": "CPU1 Host Command",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/protocol/command_dictionary.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_only"
+    },
+    {
+      "id": "REQ-AUTH-001",
+      "requirement": "Browser and host interfaces express operator intent only and shall not own protection or PWM Trip authority.",
+      "owner": "System architecture",
+      "trust": "governance_contract",
+      "implementation_refs": ["engineering_data/architecture/ownership_matrix.json", "engineering_data/ai/safety_invariants.json"],
+      "verification_refs": ["tests/test_final_integration.py"],
+      "evidence_refs": [],
+      "qualification": "architecture_contract"
+    },
+    {
+      "id": "REQ-STATE-001",
+      "requirement": "CPU1 owns the extracted SystemState vocabulary BOOT, INIT, IDLE, RUN, FAULT, MAINTENANCE and OTA.",
+      "owner": "CPU1 SystemState",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/firmware/state_machine.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_partial_transition_graph"
+    },
+    {
+      "id": "REQ-SCAL-001",
+      "requirement": "Frequency, DCV, ACV and FREQ_COMP control scalings shall use only the extracted authoritative register contract.",
+      "owner": "CPU1 SPIB control register contract",
+      "trust": "verified_source",
+      "implementation_refs": ["engineering_data/firmware/scaling.json", "engineering_data/protocol/command_dictionary.json"],
+      "verification_refs": ["tests/test_engineering_data.py"],
+      "evidence_refs": [],
+      "qualification": "source_verified_only"
+    },
+    {
+      "id": "REQ-ADC-001",
+      "requirement": "Production VOUT, IOUT, VBUS and temperature conversion shall not be available until exact ADC producer, analog front end and calibration coefficients are cross-checked.",
+      "owner": "Measurement chain",
+      "trust": "pending_verification",
+      "implementation_refs": ["engineering_data/firmware/scaling.json", "engineering_data/hardware/signal_dictionary.json"],
+      "verification_refs": ["tests/test_engineering_memory.py"],
+      "evidence_refs": [],
+      "qualification": "blocked_on_schematic_calibration_evidence"
+    },
+    {
+      "id": "REQ-TIMING-001",
+      "requirement": "A formal numerical SPIB response deadline shall not be claimed from diagnostic thresholds alone.",
+      "owner": "CPU1 SPIB timing",
+      "trust": "pending_verification",
+      "implementation_refs": ["engineering_data/timing/timing_budget.json"],
+      "verification_refs": ["tests/test_engineering_memory.py"],
+      "evidence_refs": [],
+      "qualification": "blocked_on_formal_limit_and_measurement"
+    },
+    {
+      "id": "REQ-PROT-001",
+      "requirement": "Hardware protection shutdown latency shall remain unclaimed until the exact detection-to-safe-output path is measured on hardware.",
+      "owner": "Protection architecture",
+      "trust": "pending_verification",
+      "implementation_refs": ["engineering_data/protection/protection_matrix.json"],
+      "verification_refs": ["tests/test_engineering_memory.py"],
+      "evidence_refs": [],
+      "qualification": "blocked_on_board_measurement"
+    },
+    {
+      "id": "REQ-QUAL-001",
+      "requirement": "CPU1, CPU2, M0 and board/HIL/AM3352 A-B PASS claims require exact run and artifact evidence bound to the baseline.",
+      "owner": "Verification",
+      "trust": "not_claimed",
+      "implementation_refs": ["engineering_data/verification/verification_matrix.json", "engineering_data/evidence/evidence_ledger.jsonl"],
+      "verification_refs": ["tests/test_engineering_memory.py"],
+      "evidence_refs": [],
+      "qualification": "not_claimed"
+    }
+  ],
+  "consumer_rule": "A requirement is not qualified merely because implementation or test files exist. PASS requires an evidence record bound to exact baseline, artifact and test identity."
+}
