@@ -61,7 +61,7 @@ def extract_define_int(text: str, name: str) -> int:
 def extract_enum(text: str, typedef_name: str) -> list[dict[str, int | str]]:
     clean = strip_c_comments(text)
     match = re.search(
-        rf"typedef\s+enum\s*\{{(?P<body>.*?)\}}\s*{re.escape(typedef_name)}\s*;",
+        rf"typedef\s+enum\s*\{{(?P<body>[^}}]*)\}}\s*{re.escape(typedef_name)}\s*;",
         clean,
         flags=re.S,
     )
