@@ -14,6 +14,7 @@
     "pending_verification"
   ],
   "resources": {
+    "fact_schema": "schema/fact.schema.json",
     "baseline_manifest": "baselines/manifest-2b72f506.json",
     "system_architecture": "architecture/system_architecture.md",
     "ownership_matrix": "architecture/ownership_matrix.json",
@@ -29,6 +30,8 @@
     "control_index": "control/index.json",
     "verification_matrix": "verification/verification_matrix.json",
     "test_catalog": "verification/test_catalog.json",
+    "hardware_results": "verification/hardware_results/index.json",
+    "regression_history": "verification/regression_history/index.json",
     "subsystem_index": "ai/subsystem_index.json",
     "safety_invariants": "ai/safety_invariants.json",
     "critical_paths": "ai/critical_paths.json",
