@@ -62,17 +62,19 @@ def compare(snapshot: dict, data_root: str | Path) -> dict:
     gate_canonical = {row["name"]: int(row["value"]) for row in protection["temporary_baseline_gates"]}
     check("temporary_bench_gates", facts["bench_gates"], gate_canonical)
 
-    timing_by_id = {row["id"]: row for row in timing["timing"]}
+    timing_by_id = {row["id"]: row for row in timing["budgets"]}
     for source_key, canonical_id in TIMING_BINDINGS.items():
         check(
             f"timing.{canonical_id}",
             facts["timing_ms"][source_key],
-            timing_by_id[canonical_id]["budget"]["value"],
+            timing_by_id[canonical_id]["budget"],
         )
 
     diagnostic = set(facts["spib_parser_diagnostic_threshold_ticks"])
     check("spib_parser_diagnostic_500", 500 in diagnostic, True)
     check("spib_parser_diagnostic_1000", 1000 in diagnostic, True)
+    check("timing.SPIB_PARSER_500_TICK_DIAGNOSTIC", 500, timing_by_id["SPIB_PARSER_500_TICK_DIAGNOSTIC"]["budget"])
+    check("timing.SPIB_PARSER_1000_TICK_DIAGNOSTIC", 1000, timing_by_id["SPIB_PARSER_1000_TICK_DIAGNOSTIC"]["budget"])
 
     check("host_queue_depth", facts["host_queue_depth"], commands["queue_depth"])
     by_name = {row["name"]: row for row in commands["intent_types"]}
