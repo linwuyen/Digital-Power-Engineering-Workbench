@@ -1,0 +1,35 @@
+{
+  "schema_version":"1.0",
+  "repository":"linwuyen/ASR5K_v2_28384",
+  "formal_branch":"feat/voltage-slew-runtime-complete",
+  "commit":"2b72f50648d86c11547645882248eed69f12892f",
+  "git_tree":"ec96f2232afd4da0a7f1a791680d55e0e7093289",
+  "commit_time_utc":"2026-08-28T09:40:18Z",
+  "commit_message":"fix: normalize Windows paths in qualifier gate",
+  "signature":{"verified":false,"reason":"unsigned"},
+  "production_repository_access":"read_only",
+  "extracted_source_files":[
+    "ASR5K_F28384D_CPU1/System_module/system_state.h",
+    "ASR5K_F28384D_CPU1/System_module/system_state_base.inc",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_queue.h",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_admission.h",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_controller.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/cmd_parser.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h",
+    "ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.h"
+  ],
+  "governance_support":[
+    "linwuyen/ASR5K_AGENT@main:00_Project/ARCHITECTURE_AUTHORITY.md",
+    "linwuyen/ASR5K_AGENT@main:01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"
+  ],
+  "qualification_claims":{
+    "cpu1_build":null,
+    "cpu2_build":null,
+    "m0_build":null,
+    "hardware_validation":null,
+    "am3352_ab_validation":null
+  },
+  "qualification_status":"not_claimed_by_dataset",
+  "note":"This manifest binds extracted engineering facts to source identity. It deliberately does not turn historical test statements into qualification claims without exact run/artifact evidence."
+}
