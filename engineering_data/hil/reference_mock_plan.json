@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "id": "HIL-REFERENCE-MOCK-001",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "requirements": ["REQ-AUTH-001"],
+  "purpose": "Exercise the HIL runner contract only. This plan is simulation and can never qualify production hardware.",
+  "steps": [
+    {
+      "op": "send",
+      "request": {"action": "read_status"},
+      "mock_response": {"status": "MOCK_OK", "output_enabled": false}
+    },
+    {"op": "expect", "path": "status", "equals": "MOCK_OK"},
+    {"op": "expect", "path": "output_enabled", "equals": false},
+    {"op": "note", "text": "Simulation success must remain SIMULATION_PASS and qualification_claimed=false."}
+  ]
+}
