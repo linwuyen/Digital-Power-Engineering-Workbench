@@ -1,0 +1,69 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "fault_sources":[
+    {"name":"INIT","mask":"0x00000001","trust":"verified_source"},
+    {"name":"WAVE_MEMORY","mask":"0x00000002","trust":"verified_source"},
+    {"name":"DDS","mask":"0x00000004","trust":"verified_source"},
+    {"name":"HW_PROTECTION","mask":"0x00000008","trust":"verified_source"},
+    {"name":"M0","mask":"0x00000010","trust":"verified_source"},
+    {"name":"AM3352","mask":"0x00000020","trust":"verified_source"},
+    {"name":"CPU2","mask":"0x00000040","trust":"verified_source"},
+    {"name":"ISR_OVERRUN","mask":"0x00000080","trust":"verified_source"},
+    {"name":"PFC1_UVP","mask":"0x00000100","trust":"verified_source"},
+    {"name":"PFC1_OVP","mask":"0x00000200","trust":"verified_source"},
+    {"name":"PFC1_OTP","mask":"0x00000400","trust":"verified_source"},
+    {"name":"PFC2_UVP","mask":"0x00000800","trust":"verified_source"},
+    {"name":"PFC2_OVP","mask":"0x00001000","trust":"verified_source"},
+    {"name":"PFC2_OTP","mask":"0x00002000","trust":"verified_source"},
+    {"name":"DC_OVP","mask":"0x00004000","trust":"verified_source"},
+    {"name":"FAN1","mask":"0x00008000","trust":"verified_source"},
+    {"name":"FAN2","mask":"0x00010000","trust":"verified_source"},
+    {"name":"AC_INPUT","mask":"0x00020000","trust":"verified_source"},
+    {"name":"EXTERNAL","mask":"0x80000000","trust":"verified_source"}
+  ],
+  "protections":[
+    {
+      "id":"AC_INPUT_CLASSIFICATION",
+      "signal":"GPIO8 / ECAP1",
+      "frequency_min_hz":45.0,
+      "frequency_max_hz":65.0,
+      "duty_min_percent":10.0,
+      "duty_max_percent":90.0,
+      "confirmation_samples":3,
+      "decision_owner":"CPU1 AcInputMonitor",
+      "direct_actuator_authority":false,
+      "trust":"verified_source",
+      "source":"ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.h"
+    },
+    {
+      "id":"C28_LOCAL_HW_PROTECTION",
+      "threshold":null,
+      "threshold_unit":null,
+      "detection_authority":"CPU1 C28 local CMPSS/TZ/ISR",
+      "shutdown_authority":"CPU1 local protection path",
+      "latency_us":null,
+      "trust":"governance_contract",
+      "verification":"pending_verification",
+      "reason":"Fault bit and ownership class are known; exact electrical threshold and measured shutdown latency were not extracted from the selected evidence set."
+    },
+    {
+      "id":"M0_PHYSICAL_PROTECTION",
+      "threshold":null,
+      "threshold_unit":null,
+      "detection_authority":"MSPM0 protection GPIO acquisition/decode",
+      "shutdown_authority":"MSPM0 critical physical shutdown timing",
+      "latency_us":null,
+      "trust":"governance_contract",
+      "verification":"pending_verification",
+      "reason":"Ownership is documented by active contract; exact 2b72 threshold/latency values require M0 source plus board measurement evidence."
+    }
+  ],
+  "temporary_baseline_gates":[
+    {"name":"ASR5K_CPU2_FAULT_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_AC_FAIL_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_DC_OVP_BENCH_BYPASS","value":1,"trust":"verified_source"},
+    {"name":"ASR5K_BENCH_BYPASS_M0_TIMEOUT","value":1,"trust":"verified_source"}
+  ],
+  "warning":"Bench bypasses are baseline facts, not permission to disable raw diagnostics or hardware protection."
+}
