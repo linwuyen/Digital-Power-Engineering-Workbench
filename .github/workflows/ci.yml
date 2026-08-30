@@ -32,4 +32,6 @@ jobs:
         run: python -m py_compile server.py workbench/*.py
 
       - name: Browser JavaScript syntax
-        run: node --check static/app.js
+        run: |
+          node --check static/app.js
+          node --check static/i18n.js
