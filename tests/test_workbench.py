@@ -50,6 +50,24 @@ class ControlTests(unittest.TestCase):
         self.assertTrue(math.isfinite(result["resonance_hz"]))
         self.assertEqual(len(result["frequency_hz"]), 160)
 
+    def test_loop_phase_is_unwrapped_before_phase_margin(self):
+        result = analyze_buck_pi(BuckPlantConfig(
+            vin_v=400.0,
+            inductance_h=200e-6,
+            capacitance_f=470e-6,
+            load_ohm=10.0,
+            switching_hz=100_000.0,
+            sampling_hz=100_000.0,
+            kp=0.05,
+            ki=100.0,
+            delay_samples=8.0,
+        ))
+        phase = result["loop_phase_deg"]
+        self.assertTrue(all(abs(b - a) < 180.0 for a, b in zip(phase, phase[1:])))
+        self.assertIsNotNone(result["phase_margin_deg"])
+        self.assertLess(result["phase_margin_deg"], 0.0)
+        self.assertTrue(any("non-positive" in warning for warning in result["warnings"]))
+
 
 class RemoteSafetyTests(unittest.TestCase):
     def test_out_of_range_voltage_is_rejected(self):
