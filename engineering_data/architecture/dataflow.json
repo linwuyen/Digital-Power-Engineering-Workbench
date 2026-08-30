@@ -1,0 +1,30 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "flows":[
+    {
+      "id":"host_command",
+      "path":["AM3352","CPU1 SPIB NORMAL transport","SpiBCommandRouter","HostCommandAdmission","HostCommandQueue","HostCommandController","domain owner"],
+      "trust":"verified_source",
+      "invariants":["Admission occurs before transport ACK.","Admission is bounded/O(1).","Execution/physical completion may still fail after admission.","Queue depth is 8."]
+    },
+    {
+      "id":"output_on_authority",
+      "path":["host OUTPUT_SET=ON intent","start-block check","SystemState fail-safe authorization","SystemState command allowance","queue/controller","SystemState/power sequence","physical-output contract"],
+      "trust":"verified_source",
+      "invariants":["OUTPUT OFF is always admissible at the domain admission boundary.","OUTPUT ON is rejected when DDS start is blocked or SystemState does not authorize it."]
+    },
+    {
+      "id":"fault",
+      "path":["fault source","SystemState active/latched masks","blocking-fault filter","safe-off + child power-sequence fault"],
+      "trust":"verified_source",
+      "invariants":["ISR/DMA may report a fault source but must not transition SystemState directly.","Protection evidence is not cleared by M0 session invalidation."]
+    },
+    {
+      "id":"c28_m0_physical_output",
+      "path":["CPU1 decision/policy","request/contract","MSPM0 physical actuator","applied image/telemetry","CPU1 consumer"],
+      "trust":"governance_contract",
+      "invariants":["No dual physical owner.","Commanded state must not be treated as applied state."]
+    }
+  ]
+}

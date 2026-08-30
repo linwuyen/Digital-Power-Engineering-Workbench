@@ -6,6 +6,7 @@ on:
       - main
       - feat/workbench-mvp
       - feat/workbench-v1-engineering
+      - feat/engineering-data-source
   pull_request:
     branches:
       - main
@@ -30,7 +31,20 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Python syntax
-        run: python -m py_compile server.py workbench/*.py
+        run: python -m py_compile server.py workbench/*.py tests/test_engineering_data.py
+
+      - name: Engineering data JSON integrity
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          files = sorted(Path('engineering_data').rglob('*.json'))
+          assert files, 'no engineering_data JSON files found'
+          for path in files:
+              with path.open(encoding='utf-8') as f:
+                  json.load(f)
+          print(f'validated {len(files)} engineering_data JSON files')
+          PY
 
       - name: Browser JavaScript syntax
         run: |

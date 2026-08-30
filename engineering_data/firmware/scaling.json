@@ -1,0 +1,15 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "scalings":[
+    {"id":"FREQUENCY_SET","wire_addresses":["0x0910","0x0911"],"raw_type":"uint32","scale":0.01,"unit":"Hz","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"},
+    {"id":"DCV_SET","wire_addresses":["0x0939","0x093A"],"raw_type":"int32","scale":0.0001,"unit":"V","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"},
+    {"id":"ACV_SET","wire_addresses":["0x093B","0x093C"],"raw_type":"uint32","scale":0.0001,"unit":"V","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"},
+    {"id":"FREQ_COMP_ON_OFF","wire_addresses":["0x0929"],"raw_type":"bit0","scale":1,"unit":"boolean","allowed_values":{"0":"OFF","1":"ON"},"trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"},
+    {"id":"ADC_VOUT","raw_type":null,"scale":null,"offset":null,"unit":"V","trust":"pending_verification","verification":"pending_verification","reason":"Exact ADC producer, analog front end and calibration coefficient have not been cross-checked."},
+    {"id":"ADC_IOUT","raw_type":null,"scale":null,"offset":null,"unit":"A","trust":"pending_verification","verification":"pending_verification","reason":"Exact ADC producer, analog front end and calibration coefficient have not been cross-checked."},
+    {"id":"ADC_VBUS","raw_type":null,"scale":null,"offset":null,"unit":"V","trust":"pending_verification","verification":"pending_verification","reason":"Exact ADC producer, analog front end and calibration coefficient have not been cross-checked."},
+    {"id":"ADC_TEMP","raw_type":null,"scale":null,"offset":null,"unit":"degC","trust":"pending_verification","verification":"pending_verification","reason":"Exact sensor transfer function and firmware coefficient have not been cross-checked."}
+  ],
+  "consumer_rule":"A null scale/offset is an explicit unknown and must make an engineering-unit conversion unavailable, not zero or unity."
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "owner":"CPU1",
+  "source":"ASR5K_F28384D_CPU1/System_module/system_state.h; system_state_base.inc",
+  "trust":"verified_source",
+  "system_states":[
+    {"id":"BOOT","value":0},
+    {"id":"INIT","value":1},
+    {"id":"IDLE","value":2},
+    {"id":"RUN","value":3},
+    {"id":"FAULT","value":4},
+    {"id":"MAINTENANCE","value":5},
+    {"id":"OTA","value":6}
+  ],
+  "fault_states":[
+    {"id":"CLEAR","value":0},
+    {"id":"ACTIVE","value":1},
+    {"id":"LATCHED","value":2},
+    {"id":"RECOVERY_WAIT","value":3}
+  ],
+  "system_commands":["OUTPUT_ON","OUTPUT_OFF","DDS_PARAMETER","WAVE_UPDATE","CLEAR_FAULT","ENTER_MAINTENANCE","EXIT_MAINTENANCE","ENTER_OTA","COMPLETE_OTA","READ_STATUS"],
+  "power_sequence_diagnostics":["OFF","PRECHECK","AC_COMMAND","AC_ACK_WAIT","AC_QUALIFY","AC_BENCH_READY","PFC_COMMAND","PFC_ACK_WAIT","PFC_QUALIFY","DCDC_COMMAND","DCDC_ACK_WAIT","OUTPUT_COMMAND","OUTPUT_ACK_WAIT","RUN","SHUTDOWN_COMMAND","SHUTDOWN_ACK_WAIT","BLOCKED_POLICY","FAULT"],
+  "verified_transitions":[
+    {"from":"any state with M0 session invalid and upper intent","to":"IDLE","guard":"no active or latched fault after forced safe-off","evidence":"SystemState_InvalidateM0Session"},
+    {"from":"any","to":"FAULT","guard":"fault escalation through SystemState","evidence":"SystemState_EnterFault/SystemState_RaiseFault ownership in implementation"}
+  ],
+  "transition_completeness":"partial",
+  "pending":[
+    "Full transition table is intentionally not inferred from enum ordering; extract every switch/guard before treating this as a complete simulator contract.",
+    "Board-approved physical sequencing timing remains separate from logical SystemState vocabulary."
+  ],
+  "safety_rules":[
+    "CPU1 owns state transitions; ISR/DMA may report faults but do not transition state directly.",
+    "Output authorization is denied when fail-safe fault is latched.",
+    "M0 session invalidation clears upper output intent and forces safe-off without clearing protection evidence."
+  ]
+}

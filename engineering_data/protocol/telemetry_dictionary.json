@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "telemetry":[
+    {"name":"SystemState","producer":"CPU1","symbol":"g_sSystemState.eState","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"FaultState","producer":"CPU1","symbol":"g_sSystemState.eFaultState","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"ActiveFaults","producer":"CPU1","symbol":"g_sSystemState.u32ActiveFaults","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"LatchedFaults","producer":"CPU1","symbol":"g_sSystemState.u32LatchedFaults","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"PowerSequenceState","producer":"CPU1","symbol":"g_sSystemState.ePowerSequenceState","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"OutputTerminalResult","producer":"CPU1","symbol":"g_sSystemState.u16OutputTerminalResult","wire_address":null,"trust":"verified_source","wire_mapping":"pending_verification"},
+    {"name":"HostCommandDispatchMaxTicks","producer":"CPU1","symbol":"g_sHostCommandControllerDiag.u32DispatchMaxTicks","wire_address":null,"trust":"verified_source","wire_mapping":"diagnostic only / pending verification"},
+    {"name":"SPIBParserMaxTicks","producer":"CPU1","symbol":"g_sSpiBSlave.u32SpiBParserMaxTicks","wire_address":null,"trust":"verified_source","wire_mapping":"diagnostic only / pending verification"},
+    {"name":"ACInputFrequencyMilliHz","producer":"CPU1","symbol":"g_sAcInputMonitor.u32FrequencyMilliHz","wire_address":null,"trust":"verified_source","wire_mapping":"diagnostic only / pending verification"}
+  ],
+  "rule":"A CCS-visible or local diagnostic symbol is not automatically a host wire telemetry register. Wire mappings remain null until exact protocol evidence is extracted."
+}

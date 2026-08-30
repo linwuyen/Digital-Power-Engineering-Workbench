@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "timing":[
+    {"id":"SYSTEM_AC_ACK_TIMEOUT","value":500,"unit":"ms","meaning":"software timeout ceiling","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state_base.inc"},
+    {"id":"SYSTEM_OUTPUT_ACK_TIMEOUT","value":500,"unit":"ms","meaning":"software timeout ceiling","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state_base.inc"},
+    {"id":"SYSTEM_OUTPUT_RELAY_SETTLE","value":20,"unit":"ms","meaning":"software settle interval","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state_base.inc"},
+    {"id":"SYSTEM_OUTPUT_DDS_START_TIMEOUT","value":500,"unit":"ms","meaning":"command-liveness ceiling; source explicitly says this is not a claimed hardware performance spec","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state_base.inc"},
+    {"id":"SPIB_ADMISSION_COMPLEXITY","value":"O(1)","unit":null,"meaning":"no DDS derive, trace, M0 transaction, physical output write, queue scan or blocking state-machine work on response deadline path","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Command_module/host_command_admission.h"},
+    {"id":"SPIB_PARSER_500_TICK_DIAGNOSTIC","value":500,"unit":"CPU timer ticks","meaning":"diagnostic threshold counted by u32SpiBParserOver500Count; NOT a declared pass/fail deadline","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h"},
+    {"id":"SPIB_PARSER_1000_TICK_DIAGNOSTIC","value":1000,"unit":"CPU timer ticks","meaning":"diagnostic threshold counted by u32SpiBParserOver1000Count; NOT a declared pass/fail deadline","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h"},
+    {"id":"SPIB_RESPONSE_DEADLINE","value":null,"unit":"CPU timer ticks","meaning":"formal numerical response deadline","trust":"pending_verification","verification":"pending_verification","reason":"The extracted exact headers require a bounded response path but do not declare the formal numeric acceptance limit."},
+    {"id":"CONTROL_ISR_PERIOD","value":null,"unit":"us","meaning":"production control ISR period","trust":"pending_verification","verification":"pending_verification","reason":"Not extracted and verified in this evidence pass."},
+    {"id":"HARDWARE_PROTECTION_SHUTDOWN_LATENCY","value":null,"unit":"us","meaning":"fault detection to safe physical output","trust":"pending_verification","verification":"pending_verification","reason":"Requires exact protection path plus measured board evidence; software timeout constants are not substitutes."}
+  ],
+  "rule":"Never convert diagnostic thresholds or software liveness timeouts into hardware-performance claims."
+}

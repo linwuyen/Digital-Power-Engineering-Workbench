@@ -1,0 +1,15 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "catalog":[
+    {"path":"tests/c_host_regression_test.py","category":"host numerical/native C regression","presence":"verified","result":"not_claimed"},
+    {"path":"tests/ccs_headless_result_contract_test.py","category":"CCS/headless result contract","presence":"verified","result":"not_claimed"},
+    {"path":"tests/command_responsibility_wiring_test.py","category":"ownership/wiring contract","presence":"verified","result":"not_claimed"},
+    {"path":"tests/determinism_hardening_contract_test.py","category":"deterministic timing/static contract","presence":"verified","result":"not_claimed"},
+    {"path":"tests/fault_recovery_wiring_test.py","category":"fault recovery wiring","presence":"verified","result":"not_claimed"},
+    {"path":"tests/builtin_triangle_table_test.c","category":"DDS waveform native C","presence":"verified","result":"not_claimed"},
+    {"path":"tests/dds_square_slew_test.c","category":"DDS/slew native C","presence":"verified","result":"not_claimed"}
+  ],
+  "discovery":"partial representative catalog from exact tests directory",
+  "rule":"File presence != PASS. Attach run ID, exact SHA, toolchain and output artifact before promoting result to PASS."
+}

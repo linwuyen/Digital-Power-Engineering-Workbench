@@ -51,7 +51,7 @@ The contract is designed so production firmware state definitions can become exp
 
 ### 5. Protocol Explorer
 
-Reference frame format:
+Reference/demo frame format:
 
 ```text
 AA 55 | command_id:u16le | payload_len:u16le | payload | CRC16-CCITT:u16le
@@ -64,7 +64,7 @@ Features:
 - payload size limit
 - byte-level breakdown
 
-This reference framing is **not a claim about the ASR5K production SPI protocol**. Before real Host integration, import/freeze the production command map, endian rules, CRC/checksum and response/deadline contract.
+This demo framing is **not the ASR5K production SPI protocol**. The evidence-bound production SPIB contract is now indexed separately under `engineering_data/protocol/`: 32-bit address/data request, next-master-transaction response, `0xFFFF0000` NULL frame, additive response checksum semantics, and only the scalar register addresses proven by the pinned production source.
 
 ### 6. Web Serial Gateway
 
@@ -96,6 +96,40 @@ GitHub Pages stores the latest local engineering runs in browser `localStorage` 
 
 A production team regression database should instead be written by CI/HIL infrastructure with immutable commit/build/test metadata.
 
+## ASR5K Engineering Data Source
+
+`engineering_data/` is the evidence-bound truth/index layer for Workbench, AI agents, host/HIL tools and future report generators.
+
+Current dataset baseline:
+
+```text
+repository: linwuyen/ASR5K_v2_28384
+branch:     feat/voltage-slew-runtime-complete
+commit:     2b72f50648d86c11547645882248eed69f12892f
+```
+
+Start at:
+
+```text
+engineering_data/index.json
+```
+
+The dataset normalizes:
+
+- exact baseline identity
+- architecture and C28/MSPM0 ownership
+- SystemState/fault vocabulary and critical paths
+- verified signal names and explicit unknown scaling
+- protection facts and explicit unknown thresholds/latencies
+- SPIB host wire contract and verified scalar registers
+- verification/test catalogs without false PASS claims
+- AI safety invariants and commit-pinned evidence links
+- empty hardware/regression ledgers that only accept evidence-bound future results
+
+Trust values are explicit: `verified_source`, `governance_contract`, `derived`, or `pending_verification`. A `null` pending value is intentional and must never be silently replaced by zero, one, a legacy register or a guessed datasheet value.
+
+This repository does not modify the production ASR5K source. The generated data is a derived navigation/normalization layer and cannot override higher-tier design or production-source authority.
+
 ## Run locally
 
 Python 3.10+; no third-party runtime dependency is required for the reference backend.
@@ -110,11 +144,13 @@ Open `http://localhost:8000`.
 
 The repository root redirects to `static/`. The browser app loads the engineering v1 modules from `static/eng/` and requires no server for calculations, SFRA comparison, contracts, protocol exploration, mock validation or report export.
 
+Static engineering-data JSON is also published by GitHub Pages, with `engineering_data/index.json` as the stable discovery endpoint.
+
 ## Verification
 
 ```bash
 python -m unittest discover -s tests -v
-python -m py_compile server.py workbench/*.py
+python -m py_compile server.py workbench/*.py tests/test_engineering_data.py
 node --check static/app.js
 node --check static/i18n.js
 node --check static/eng/loader.js
@@ -124,7 +160,7 @@ node --check static/eng/control_sfra.js
 node --check static/eng/system_tools.js
 ```
 
-GitHub Actions runs the same verification.
+GitHub Actions runs the same verification and additionally parses every JSON file under `engineering_data/`.
 
 ## Safety / authority boundary
 
@@ -145,11 +181,12 @@ The browser and host are allowed to express **operator intent** only. They do no
 
 When sources disagree, use this order:
 
-1. calibrated hardware measurements / independent instruments
-2. production firmware behavior and frozen interface contracts
-3. Python reference models in `workbench/`
-4. browser models under `static/`
-5. documentation/examples/reference templates
+1. current explicit instruction / formal design documents
+2. exact production firmware behavior and frozen interface contracts
+3. active architecture contracts, with their baseline caveat
+4. calibrated hardware measurements / qualification evidence bound to exact artifacts
+5. derived `engineering_data/` index
+6. Python/browser reference models and examples
 
 ## Repository architecture
 
@@ -165,6 +202,15 @@ GitHub Pages / Browser
 ├─ Validation runner
 └─ Local history / export
 
+Engineering truth/index layer
+├─ engineering_data/architecture
+├─ engineering_data/firmware
+├─ engineering_data/protocol
+├─ engineering_data/control
+├─ engineering_data/verification
+├─ engineering_data/baselines
+└─ engineering_data/ai
+
 Python reference backend
 ├─ workbench.measurement
 ├─ workbench.profiles
@@ -178,16 +224,18 @@ Python reference backend
 └─ workbench.validation
 ```
 
-## What still requires project-specific truth
+## Explicit pending verification
 
-The software framework is intentionally complete enough to accept the missing production facts, but these facts cannot be safely guessed:
+The data-source framework is complete, but evidence that was not established is intentionally represented as `null` / `pending_verification` rather than guessed. Current important pending facts include:
 
-- real ASR5K ADC/DAC/current/voltage channel coefficients
-- production AM3352 ↔ C2000 command IDs/frame/checksum/deadlines
-- real PSFB/LLC/PFC operating-point plant parameters
-- real HIL instrument transport and pass/fail tolerances
+- real ASR5K ADC current/voltage/temperature channel scaling and calibration coefficients
+- complete AM3352 ↔ C2000 register/telemetry map beyond the extracted authoritative scalar registers
+- formal numerical SPIB response-deadline acceptance limit
+- measured hardware protection shutdown latency
+- production PSFB/LLC/PFC plant/controller/SFRA operating-point package
+- exact board/HIL/AM3352 A/B qualification records for the pinned baseline
 
-Those items should be imported as reviewed profiles/contracts or measured SFRA data, not hard-coded from assumptions.
+Promote a pending value only when exact source, schematic/calibration, or measured evidence is added and bound to the relevant baseline/artifact.
 
 ## Repository policy
 

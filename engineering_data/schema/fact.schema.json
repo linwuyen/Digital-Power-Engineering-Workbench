@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://linwuyen.github.io/Digital-Power-Engineering-Workbench/engineering_data/schema/fact.schema.json",
+  "title": "Engineering Fact Envelope",
+  "description": "Reusable schema fragment for evidence-bound engineering facts. Dataset files may add domain-specific fields but must preserve explicit trust/evidence semantics.",
+  "type": "object",
+  "properties": {
+    "id": {"type": ["string", "null"]},
+    "name": {"type": ["string", "null"]},
+    "value": {},
+    "unit": {"type": ["string", "null"]},
+    "trust": {
+      "enum": ["verified_source", "governance_contract", "derived", "pending_verification", "dataset_policy"]
+    },
+    "verification": {
+      "enum": ["verified", "pending_verification", "not_claimed", "not_applicable"]
+    },
+    "source": {"type": ["string", "null"]},
+    "evidence": {"type": ["string", "array", "null"]},
+    "baseline": {"type": ["string", "null"]},
+    "reason": {"type": ["string", "null"]}
+  },
+  "required": ["trust"],
+  "additionalProperties": true
+}

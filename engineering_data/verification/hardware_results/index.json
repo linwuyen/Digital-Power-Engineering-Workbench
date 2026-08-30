@@ -1,0 +1,18 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "records":[],
+  "status":"no_result_claimed",
+  "required_record_fields":[
+    "timestamp",
+    "dut_repository",
+    "dut_commit",
+    "programmed_artifact_identity",
+    "test_fixture",
+    "instrument_or_host_identity",
+    "procedure",
+    "result",
+    "evidence"
+  ],
+  "rule":"Do not add PASS/FAIL without binding the measurement to an exact DUT/artifact identity."
+}

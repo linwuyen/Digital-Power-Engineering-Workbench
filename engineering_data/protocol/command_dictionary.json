@@ -1,0 +1,32 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "queue_depth":8,
+  "intent_types":[
+    {"name":"NONE","type_id":0,"wire_id":null,"trust":"verified_source"},
+    {"name":"OUTPUT_SET","type_id":1,"wire_id":null,"admission":"OFF always admissible at domain boundary; ON requires no DDS start block, fail-safe authorization and SystemState OUTPUT_ON allowance","trust":"verified_source"},
+    {"name":"WAVEFORM_SET","type_id":2,"wire_id":null,"admission":"reject waveform handover FAULT or BUSY","trust":"verified_source"},
+    {"name":"MODE_SET","type_id":3,"wire_id":null,"admission":"reject waveform handover FAULT; BUSY may be accepted for queued scalar execution","trust":"verified_source"},
+    {"name":"FREQUENCY_SET","type_id":4,"wire_addresses":["0x0910","0x0911"],"representation":"uint32, 0.01 Hz","trust":"verified_source"},
+    {"name":"DCV_SET","type_id":5,"wire_addresses":["0x0939","0x093A"],"representation":"int32, 0.0001 V","trust":"verified_source"},
+    {"name":"ACV_SET","type_id":6,"wire_addresses":["0x093B","0x093C"],"representation":"uint32, 0.0001 V","trust":"verified_source"},
+    {"name":"VSLEW_SETTING_SET","type_id":7,"wire_id":null,"admission":"always accepted by Phase-0 policy boundary; no actuator ownership","trust":"verified_source"},
+    {"name":"VSLEW_MODE_SET","type_id":8,"wire_id":null,"admission":"always accepted by Phase-0 policy boundary; no actuator ownership","trust":"verified_source"}
+  ],
+  "additional_verified_registers":[
+    {"name":"FREQ_COMP_ON_OFF","address":"0x0929","representation":"bit0; 0=OFF, 1=ON","trust":"verified_source"}
+  ],
+  "intent_structure":{
+    "fields":["u16Type","u16RawAddress","u16RawData","u16Reserved","u32Value","u32Sequence"],
+    "trust":"verified_source",
+    "source":"ASR5K_F28384D_CPU1/Command_module/host_command_queue.h"
+  },
+  "controller_states":["IDLE","DISPATCH","WAIT_OUTPUT","FINALIZE","DDS_CONTEXT","DDS_PREPARE","DDS_BIND","DDS_POST_COMMIT"],
+  "source_files":[
+    "ASR5K_F28384D_CPU1/Command_module/host_command_queue.h",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_admission.h",
+    "ASR5K_F28384D_CPU1/Command_module/host_command_controller.h",
+    "ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"
+  ],
+  "rule":"wire_id/address is null unless the exact authoritative register contract has been extracted; enum type IDs are internal intent IDs, not assumed wire addresses."
+}

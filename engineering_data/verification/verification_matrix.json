@@ -1,0 +1,23 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "scope":[
+    {"item":"baseline identity","status":"VERIFIED","evidence":"Git commit SHA/tree fetched directly from production repository"},
+    {"item":"CPU1 SystemState vocabulary/fault bitmap","status":"VERIFIED","evidence":"exact system_state.h"},
+    {"item":"CPU1 host intent queue/admission/controller vocabulary","status":"VERIFIED","evidence":"exact Command_module headers"},
+    {"item":"SPIB 32-bit request / next-response contract and NULL frame","status":"VERIFIED","evidence":"exact cmd_parser.h"},
+    {"item":"scalar register addresses/scales for frequency, freq-comp, DCV, ACV","status":"VERIFIED","evidence":"exact spib_control_register_contract.h"},
+    {"item":"AC input classification thresholds/owner","status":"VERIFIED","evidence":"exact ac_input_monitor.h"},
+    {"item":"C28/M0 one-owner architecture","status":"GOVERNANCE_CONTRACT","evidence":"active ASR5K_AGENT ownership contract; tied to earlier milestone SHA"},
+    {"item":"ADC measurement scaling/calibration","status":"PENDING","evidence":null},
+    {"item":"full wire-register dictionary","status":"PENDING","evidence":null},
+    {"item":"formal numerical SPIB response deadline","status":"PENDING","evidence":null},
+    {"item":"hardware protection shutdown latency","status":"PENDING","evidence":null},
+    {"item":"complete production control plant/controller model","status":"PENDING","evidence":null},
+    {"item":"CPU1 build PASS at baseline","status":"NOT_CLAIMED","evidence":null},
+    {"item":"CPU2 build PASS at baseline","status":"NOT_CLAIMED","evidence":null},
+    {"item":"M0 build PASS at baseline","status":"NOT_CLAIMED","evidence":null},
+    {"item":"board/HIL/AM3352 A-B qualification at baseline","status":"NOT_CLAIMED","evidence":null}
+  ],
+  "policy":"Presence of a test file proves test coverage exists, not that a specific run passed. PASS is recorded only with exact run/artifact evidence."
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "production_models":[],
+  "production_sfra":[],
+  "production_operating_points":[],
+  "status":"pending_verification",
+  "reason":"The current evidence extraction establishes command/state/protection contracts but does not yet establish a complete production plant/controller/SFRA operating-point package. Generic Workbench models must not be labeled ASR5K production models.",
+  "required_before_promotion":[
+    "exact topology and operating point",
+    "L/C/R/ESR or identified plant source",
+    "sampling/PWM delay",
+    "controller coefficients and realization",
+    "SFRA acquisition identity where applicable",
+    "baseline/artifact identity"
+  ]
+}

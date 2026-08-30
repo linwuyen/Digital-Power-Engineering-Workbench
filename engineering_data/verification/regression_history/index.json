@@ -1,0 +1,15 @@
+{
+  "schema_version":"1.0",
+  "records":[],
+  "status":"no_result_claimed",
+  "required_record_fields":[
+    "timestamp",
+    "repository",
+    "commit",
+    "test_suite",
+    "toolchain",
+    "result",
+    "artifact_or_log"
+  ],
+  "rule":"Historical conversation statements are not imported as regression PASS records without exact run evidence."
+}
