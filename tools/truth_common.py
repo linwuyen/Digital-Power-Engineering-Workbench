@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 
-_C_SUFFIX = re.compile(r"(?i)(?<=\b[0-9a-fx])(?:u|l)+\b")
+_C_SUFFIX = re.compile(r"(?i)(?:u|l)+$")
 
 
 def load_json(path: str | Path) -> Any:
