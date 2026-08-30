@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "invariants":[
+    {"id":"STATE_OWNER","severity":"critical","rule":"CPU1 SystemState is the sole top-level state-transition owner. ISR/DMA may report fault sources but must not transition SystemState directly.","trust":"verified_source","evidence":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"id":"NO_DUAL_PHYSICAL_OWNER","severity":"critical","rule":"A physical actuator or critical timing engine has one owner only.","trust":"governance_contract","evidence":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"},
+    {"id":"COMMAND_NOT_APPLIED","severity":"critical","rule":"Requested/commanded output state must never be treated as proof of physical applied state or ACK.","trust":"governance_contract","evidence":"C28/M0 ownership contract; system_state.h applied/requested fields"},
+    {"id":"HOST_NO_SAFETY_AUTHORITY","severity":"critical","rule":"Browser/host transport expresses operator intent; it must not become the final OVP/OCP/OTP/PWM-trip/interlock safety authority.","trust":"derived","derivation":"Host admission is transport/domain intent while exact SystemState and C28/M0 contracts retain local/physical fault ownership."},
+    {"id":"OFF_PRIORITY","severity":"critical","rule":"OUTPUT OFF must remain admissible at the HostCommandAdmission domain boundary even when OUTPUT ON is blocked.","trust":"verified_source","evidence":"ASR5K_F28384D_CPU1/Command_module/host_command_admission.h"},
+    {"id":"FAIL_SAFE_ON_SESSION_EDGE","severity":"critical","rule":"M0 session invalidation clears upper output intent, requests OUT_ON=0, forces safe-off and stops live DDS without clearing active/latched protection evidence.","trust":"verified_source","evidence":"ASR5K_F28384D_CPU1/System_module/system_state_base.inc"},
+    {"id":"BOUNDED_SPI_ADMISSION","severity":"high","rule":"SPIB admission stays O(1): no DDS derive, trace, M0 transaction, physical output write, queue scan or blocking state-machine work on the response-deadline path.","trust":"verified_source","evidence":"ASR5K_F28384D_CPU1/Command_module/host_command_admission.h"},
+    {"id":"UNKNOWN_IS_NOT_DEFAULT","severity":"high","rule":"Any null/pending engineering value must remain unavailable; never substitute zero, one, legacy values or a guessed datasheet value.","trust":"dataset_policy"},
+    {"id":"NO_FALSE_QUALIFICATION","severity":"high","rule":"A test source file or historical statement is not a PASS claim. Qualification must bind result, toolchain/artifact and exact integrated SHA.","trust":"governance_contract","evidence":"ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"}
+  ],
+  "agent_instruction":"Before proposing production changes, load this file plus ownership_matrix.json, state_machine.json, protection_matrix.json and the exact baseline manifest. Stop on a critical invariant conflict."
+}
