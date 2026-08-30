@@ -1,0 +1,22 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "signals":[
+    {"name":"SystemState","symbol":"g_sSystemState.eState","owner":"CPU1","type":"E_SYSTEM_STATE","unit":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"ActiveFaults","symbol":"g_sSystemState.u32ActiveFaults","owner":"CPU1","type":"uint32_t bitmap","unit":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"LatchedFaults","symbol":"g_sSystemState.u32LatchedFaults","owner":"CPU1","type":"uint32_t bitmap","unit":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"OutputRequested","symbol":"g_sSystemState.u16OutputRequested","owner":"CPU1","type":"uint16_t","unit":"boolean","trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"PowerRequestedMask","symbol":"g_sSystemState.u16PowerRequestedMask","owner":"CPU1","type":"uint16_t bitmap","unit":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"PowerAppliedMask","symbol":"g_sSystemState.u16PowerAppliedMask","owner":"CPU1 mirror of applied output","type":"uint16_t bitmap","unit":null,"trust":"verified_source","source":"ASR5K_F28384D_CPU1/System_module/system_state.h"},
+    {"name":"HostFrequencySetpoint","symbol":"g_sHostCommandControllerDiag.sModel.u32FrequencyX100","owner":"CPU1 HostCommandController","type":"uint32_t","unit":"0.01 Hz/count","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Command_module/host_command_controller.h"},
+    {"name":"HostDCVoltageSetpoint","symbol":"g_sHostCommandControllerDiag.sModel.i32DcvX10000","owner":"CPU1 HostCommandController","type":"int32_t","unit":"0.0001 V/count","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Command_module/host_command_controller.h; SPIB_module/spib_control_register_contract.h"},
+    {"name":"HostACVoltageSetpoint","symbol":"g_sHostCommandControllerDiag.sModel.u32AcvX10000","owner":"CPU1 HostCommandController","type":"uint32_t","unit":"0.0001 V/count","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Command_module/host_command_controller.h; SPIB_module/spib_control_register_contract.h"},
+    {"name":"ACInputFrequency","symbol":"g_sAcInputMonitor.u32FrequencyMilliHz","owner":"CPU1 AcInputMonitor","type":"uint32_t","unit":"mHz","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.h"},
+    {"name":"ACInputDuty","symbol":"g_sAcInputMonitor.u16DutyBasisPoints","owner":"CPU1 AcInputMonitor","type":"uint16_t","unit":"basis points","trust":"verified_source","source":"ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.h"},
+    {"name":"SPIBNormalPollGapMaxTicks","symbol":"g_sSpiBSlave.u32NormalPollGapMaxTicks","owner":"CPU1 SPIB transport","type":"uint32_t","unit":"CPU timer ticks","trust":"verified_source","source":"ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h"}
+  ],
+  "pending_signal_families":[
+    {"family":"ADC measurement channels (VOUT/IOUT/ILA/ILB/VBUS/TEMP)","verification":"pending_verification","reason":"Do not publish channel names/scales until exact producer/scaling source and hardware schematic/calibration are cross-checked."},
+    {"family":"CPU2 DDS runtime telemetry","verification":"pending_verification","reason":"Not extracted in this evidence pass."}
+  ]
+}
