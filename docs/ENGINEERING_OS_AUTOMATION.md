@@ -5,7 +5,7 @@ This layer turns `engineering_data/` from a manually curated knowledge base into
 ## Pipeline
 
 ```text
-Exact ASR5K production checkout
+Exact ASR5K production source
         |
         v
 extract_source_truth.py
@@ -58,6 +58,19 @@ python tools/verify_truth_drift.py \
   --snapshot /tmp/asr5k-source-truth.json \
   --data-root engineering_data
 ```
+
+## Pinned Snapshot and Live Private Recheck
+
+`ASR5K_v2_28384` is a private repository. A workflow token issued to this Workbench repository does not automatically have read access to another private repository.
+
+Therefore CI has two explicit layers:
+
+1. **Always-on pinned check** — `engineering_data/source_truth/snapshot-2b72f506.json` is a commit-pinned snapshot extracted from the authoritative source files at `2b72f50648d86c11547645882248eed69f12892f`. Every CI run compares this snapshot with the canonical engineering dataset and fails on drift.
+2. **Optional live private-source recheck** — if a read-only repository secret named `ASR5K_READ_TOKEN` is configured, CI clones the private production branch read-only, verifies that its HEAD is still the pinned SHA, re-runs the extractor, and compares the live extraction with the canonical dataset.
+
+If `ASR5K_READ_TOKEN` is absent, the live check prints an explicit GitHub Actions notice and exits successfully as **SKIPPED**. That skip is not represented as a live-source PASS. The pinned source-snapshot drift gate still runs and must pass.
+
+If the production branch later moves away from the pinned SHA, a configured live check deliberately fails until a new baseline is reviewed and qualified.
 
 ## Drift Policy
 
@@ -122,9 +135,15 @@ The process adapter speaks newline-delimited JSON to a local gateway. The harnes
 
 ## CI Contract
 
-CI performs two different truth checks:
+Every CI run performs:
 
-1. unit/invariant regression against the checked-in engineering dataset;
-2. a read-only clone of the pinned ASR5K branch, exact-HEAD verification, source extraction and drift comparison.
+1. Python/invariant regression;
+2. Python syntax checks for Workbench and automation tools;
+3. JSON/JSONL integrity checks;
+4. requirement traceability resolution;
+5. a non-qualifying HIL mock contract run;
+6. pinned exact-source snapshot drift comparison;
+7. optional live private ASR5K extraction when `ASR5K_READ_TOKEN` exists;
+8. browser JavaScript syntax checks.
 
-If the production branch moves away from the pinned baseline, the source-truth step fails instead of silently evaluating a different DUT.
+The automation layer is a verification and evidence framework. It does not claim board, HIL, AM3352 A/B, protection-latency or control-loop qualification until exact measured evidence is appended to the evidence ledger.
