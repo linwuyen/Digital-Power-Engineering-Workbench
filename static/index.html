@@ -3,13 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Interactive digital power engineering workbench for measurement chains, loop control, firmware state machines, and safe mock PSU control." />
   <title>Digital Power Engineering Workbench</title>
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div><div class="eyebrow">DIGITAL POWER ENGINEERING</div><h1>Workbench</h1></div>
-    <div class="status-pill"><span class="dot"></span><span id="healthText">checking backend</span></div>
+    <div class="top-status">
+      <span id="runtimeMode" class="badge">detecting runtime</span>
+      <div class="status-pill"><span class="dot"></span><span id="healthText">initializing</span></div>
+    </div>
   </header>
   <main class="shell">
     <aside class="sidebar">
@@ -21,7 +25,7 @@
     </aside>
     <section class="content">
       <section id="measurement" class="panel active">
-        <div class="panel-head"><div><div class="eyebrow">MEASURE → CONDITION → CONVERT</div><h2>Datasheet / Signal-Chain Calculator</h2></div><span class="badge">MVP</span></div>
+        <div class="panel-head"><div><div class="eyebrow">MEASURE → CONDITION → CONVERT</div><h2>Datasheet / Signal-Chain Calculator</h2></div><span class="badge">STATIC + PYTHON PARITY</span></div>
         <div class="grid two">
           <form id="measurementForm" class="card form-grid">
             <label>Physical value<input name="physical_value" type="number" step="any" value="5" /></label>
@@ -34,7 +38,7 @@
             <label>ADC bits<input name="adc_bits" type="number" step="1" value="12" /></label>
             <button type="submit" class="primary">Calculate chain</button>
           </form>
-          <div class="card"><h3>Signal path</h3><div class="signal-flow"><div><span>PHYSICAL</span><b id="mPhysical">—</b></div><i>→</i><div><span>SENSOR</span><b id="mSensor">—</b></div><i>→</i><div><span>OP AMP</span><b id="mOpamp">—</b></div><i>→</i><div><span>ADC IN</span><b id="mAdcV">—</b></div><i>→</i><div><span>ADC CODE</span><b id="mCode">—</b></div></div><div class="metrics"><div><span>Recovered physical</span><strong id="mRecovered">—</strong></div><div><span>Quantization error</span><strong id="mError">—</strong></div><div><span>ADC LSB</span><strong id="mLsb">—</strong></div><div><span>Clipped</span><strong id="mClipped">—</strong></div></div></div>
+          <div class="card"><h3>Signal path</h3><div class="signal-flow"><div><span>PHYSICAL</span><b id="mPhysical">—</b></div><i>→</i><div><span>SENSOR</span><b id="mSensor">—</b></div><i>→</i><div><span>OP AMP</span><b id="mOpamp">—</b></div><i>→</i><div><span>ADC IN</span><b id="mAdcV">—</b></div><i>→</i><div><span>ADC CODE</span><b id="mCode">—</b></div></div><div class="metrics"><div><span>Recovered physical</span><strong id="mRecovered">—</strong></div><div><span>Quantization error</span><strong id="mError">—</strong></div><div><span>ADC LSB</span><strong id="mLsb">—</strong></div><div><span>Clipped</span><strong id="mClipped">—</strong></div></div><p class="note">Forward path: physical quantity → sensor → op amp → divider → ADC quantization. The reverse path uses the same coefficients to expose scaling and clipping errors.</p></div>
         </div>
       </section>
       <section id="control" class="panel">
@@ -43,20 +47,22 @@
           <form id="controlForm" class="card form-grid compact">
             <label>Vin (V)<input name="vin_v" type="number" step="any" value="400" /></label><label>L (µH)<input name="inductance_uh" type="number" step="any" value="200" /></label><label>C (µF)<input name="capacitance_uf" type="number" step="any" value="470" /></label><label>Load (Ω)<input name="load_ohm" type="number" step="any" value="10" /></label><label>Switching (kHz)<input name="switching_khz" type="number" step="any" value="100" /></label><label>Sampling (kHz)<input name="sampling_khz" type="number" step="any" value="100" /></label><label>Kp<input name="kp" type="number" step="any" value="0.01" /></label><label>Ki<input name="ki" type="number" step="any" value="20" /></label><label>Delay (samples)<input name="delay_samples" type="number" step="any" value="1" /></label><button type="submit" class="primary">Analyze loop</button>
           </form>
-          <div class="stack"><div class="metrics card horizontal"><div><span>LC resonance</span><strong id="cRes">—</strong></div><div><span>0 dB crossover</span><strong id="cCross">—</strong></div><div><span>Phase margin</span><strong id="cPm">—</strong></div><div><span>Tustin b0 / b1</span><strong id="cCoeff">—</strong></div></div><div class="card"><canvas id="bodeCanvas" width="1000" height="420"></canvas><div class="legend"><span>Plant</span><span>Open loop</span></div></div><div id="controlWarnings" class="warning-list"></div></div>
+          <div class="stack"><div class="metrics card horizontal"><div><span>LC resonance</span><strong id="cRes">—</strong></div><div><span>0 dB crossover</span><strong id="cCross">—</strong></div><div><span>Phase margin</span><strong id="cPm">—</strong></div><div><span>Tustin b0 / b1</span><strong id="cCoeff">—</strong></div></div><div class="card"><canvas id="bodeCanvas" width="1100" height="650"></canvas><div class="legend"><span>Plant magnitude</span><span>Open-loop magnitude</span><span class="phase-key">Open-loop phase</span></div></div><div id="controlWarnings" class="warning-list"></div></div>
         </div>
       </section>
       <section id="state" class="panel">
         <div class="panel-head"><div><div class="eyebrow">STATE → AUTHORITY → TRANSITION</div><h2>Firmware State Machine Viewer</h2></div><span class="badge">Reference model</span></div>
-        <div id="authorityCards" class="authority-grid"></div><div class="card state-card"><div id="stateGraph" class="state-graph"></div></div><div class="grid two"><div class="card"><h3>Selected state</h3><div id="stateDetail" class="detail">Select a state.</div></div><div class="card"><h3>Transitions</h3><div id="transitionList" class="transition-list"></div></div></div>
+        <div id="authorityCards" class="authority-grid"></div>
+        <div class="card state-card"><div id="stateGraph" class="state-graph"></div></div>
+        <div class="grid two state-lower"><div class="card"><h3>Selected state</h3><div id="stateDetail" class="detail">Select a state.</div></div><div class="card"><div class="telemetry-top"><h3>Transition simulator</h3><span id="simState" class="badge">—</span></div><p class="note">This simulator shows policy flow only; it is not a production state machine implementation.</p><div id="transitionList" class="transition-list"></div><div id="transitionHistory" class="history"></div></div></div>
       </section>
       <section id="remote" class="panel">
         <div class="panel-head"><div><div class="eyebrow">OPERATOR INTENT → VALIDATION → MOCK TRANSPORT</div><h2>Power Supply Remote Control</h2></div><span class="badge danger">MOCK ONLY</span></div>
-        <div class="grid two"><div class="card"><h3>Setpoints</h3><div class="form-grid"><label>Voltage (V)<input id="rVoltage" type="number" step="any" value="100" /></label><label>Current limit (A)<input id="rCurrent" type="number" step="any" value="5" /></label><button id="setVoltage" class="secondary">Apply voltage</button><button id="setCurrent" class="secondary">Apply current</button></div><div class="button-row"><button id="outputOn" class="primary">OUTPUT ON</button><button id="outputOff" class="danger-btn">OUTPUT OFF</button></div><p class="note">The backend intentionally uses a deterministic mock device. Real transport must preserve firmware-side limits, state checks, interlocks and local trip authority.</p></div><div class="card telemetry"><div class="telemetry-top"><h3>Telemetry</h3><span id="rState" class="badge">—</span></div><div class="big-number"><span>VOUT</span><strong id="rVout">0.000 V</strong></div><div class="big-number"><span>IOUT</span><strong id="rIout">0.000 A</strong></div><div class="metrics horizontal"><div><span>Power</span><strong id="rPower">0 W</strong></div><div><span>Mode</span><strong id="rMode">—</strong></div><div><span>Fault</span><strong id="rFault">—</strong></div><div><span>Transport</span><strong id="rTransport">—</strong></div></div></div></div>
+        <div class="grid two"><div class="card"><h3>Setpoints</h3><div class="form-grid"><label>Voltage (V)<input id="rVoltage" type="number" step="any" value="100" /></label><label>Current limit (A)<input id="rCurrent" type="number" step="any" value="5" /></label><button id="setVoltage" class="secondary">Apply voltage</button><button id="setCurrent" class="secondary">Apply current</button></div><div class="button-row"><button id="outputOn" class="primary">OUTPUT ON</button><button id="outputOff" class="danger-btn">OUTPUT OFF</button></div><h3 class="section-title">Safety-path simulation</h3><div class="button-row"><button id="injectOcp" class="secondary">Inject OCP</button><button id="clearFault" class="secondary">Clear fault</button></div><label class="toggle-row"><input id="interlockOk" type="checkbox" checked /><span>Interlock closed / OK</span></label><p class="note">The device model intentionally blocks OUTPUT_ON when a fault is latched or interlock is open. Real OVP/OCP/OTP, PWM Trip and interlock must remain local and deterministic in hardware/firmware.</p></div><div class="card telemetry"><div class="telemetry-top"><h3>Telemetry</h3><span id="rState" class="badge">—</span></div><div class="big-number"><span>VOUT</span><strong id="rVout">0.000 V</strong></div><div class="big-number"><span>IOUT</span><strong id="rIout">0.000 A</strong></div><div class="metrics horizontal"><div><span>Power</span><strong id="rPower">0 W</strong></div><div><span>Mode</span><strong id="rMode">—</strong></div><div><span>Fault</span><strong id="rFault">—</strong></div><div><span>Transport</span><strong id="rTransport">—</strong></div></div><div class="command-log"><h3>Command log</h3><div id="commandLog"></div></div></div></div>
       </section>
     </section>
   </main>
   <div id="toast" class="toast"></div>
-  <script src="/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
