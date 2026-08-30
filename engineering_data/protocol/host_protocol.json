@@ -1,0 +1,39 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "transport":{
+    "name":"SPIB NORMAL",
+    "device_role":"CPU1 slave",
+    "host_role":"AM3352 master",
+    "request_bits":32,
+    "request_layout":{"bits_31_16":"address = group[7:0]:id[7:0]","bits_15_0":"data[15:0]"},
+    "response_bits":32,
+    "response_timing":"response generated for the next master transaction",
+    "request_semantics":"one complete 32-bit request decoded exactly once",
+    "response_semantics":"one complete 32-bit response generated per complete request",
+    "trust":"verified_source",
+    "source":"ASR5K_F28384D_CPU1/SPIB_module/cmd_parser.h"
+  },
+  "null_frame":{
+    "value":"0xFFFF0000",
+    "request_meaning":"only legal NULL/fetch request when address is 0xFFFF",
+    "response_meaning":"rejected, malformed, unsupported or unknown command",
+    "trust":"verified_source"
+  },
+  "accepted_response":{
+    "data_word":"router response data",
+    "address_word_formula":"request_address + low_byte(response_data) + high_byte(response_data), modulo uint16",
+    "trust":"verified_source",
+    "note":"This is an additive data checksum/echo encoding; do not label it CRC."
+  },
+  "page_wave_download":{
+    "normal_parser_support":false,
+    "trust":"verified_source",
+    "note":"Exact parser source states Page/wave download is out of scope in this NORMAL-only stage."
+  },
+  "unknowns":[
+    {"field":"SPI clock rate/mode","value":null,"verification":"pending_verification"},
+    {"field":"formal numeric response deadline","value":null,"verification":"pending_verification"},
+    {"field":"full register handbook coverage","value":null,"verification":"pending_verification"}
+  ]
+}
