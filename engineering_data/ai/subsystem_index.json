@@ -1,0 +1,13 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "subsystems":[
+    {"name":"Host SPIB ingress","owner":"CPU1","paths":["ASR5K_F28384D_CPU1/SPIB_module/cmd_parser.h","ASR5K_F28384D_CPU1/SPIB_module/spi_slave.h","ASR5K_F28384D_CPU1/SPIB_module/spib_control_register_contract.h"],"data_sources":["../protocol/host_protocol.json","../protocol/command_dictionary.json"]},
+    {"name":"Host command domain","owner":"CPU1","paths":["ASR5K_F28384D_CPU1/Command_module/host_command_queue.h","ASR5K_F28384D_CPU1/Command_module/host_command_admission.h","ASR5K_F28384D_CPU1/Command_module/host_command_controller.h"],"data_sources":["../architecture/dataflow.json","../protocol/command_dictionary.json"]},
+    {"name":"SystemState and fault ownership","owner":"CPU1","paths":["ASR5K_F28384D_CPU1/System_module/system_state.h","ASR5K_F28384D_CPU1/System_module/system_state_base.inc"],"data_sources":["../firmware/state_machine.json","../firmware/protection_matrix.json"]},
+    {"name":"AC input protection/classification","owner":"CPU1","paths":["ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.h","ASR5K_F28384D_CPU1/Protection_module/ac_input_monitor.c"],"data_sources":["../firmware/protection_matrix.json","../firmware/signals.json"]},
+    {"name":"C28/MSPM0 shared physical-output boundary","owner":"split decision/physical ownership","paths":["ASR5K_AGENT/01_Architecture/ACTIVE/C28_M0_OWNERSHIP_AND_BRANCHING.md"],"data_sources":["../architecture/ownership_matrix.json","../ai/safety_invariants.json"]},
+    {"name":"Production ADC/scaling","owner":null,"paths":[],"data_sources":["../firmware/scaling.json"],"status":"pending_verification"},
+    {"name":"Production control/SFRA","owner":null,"paths":[],"data_sources":["../control/index.json"],"status":"pending_verification"}
+  ]
+}
