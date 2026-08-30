@@ -1,0 +1,30 @@
+{
+  "schema_version":"1.0",
+  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
+  "paths":[
+    {
+      "id":"SPIB_COMMAND_RESPONSE",
+      "criticality":"real_time_host_response",
+      "sequence":["complete 32-bit request","parse address/data","SpiBCommandRouter_TryHandle","HostCommandAdmission_Evaluate where applicable","accepted response or NULL frame","enqueue next-transaction response"],
+      "must_not_add":["unbounded loop","queue scan in admission","DDS derivation in admission","M0 transaction in admission","physical output write in admission","blocking state-machine work in admission"]
+    },
+    {
+      "id":"OUTPUT_ON",
+      "criticality":"safety_control",
+      "sequence":["OUTPUT_SET=ON intent","DDS start-block check","fail-safe fault authorization","SystemState command allowance","reliable queue ownership","background controller","SystemState/power sequence","physical applied-state confirmation"],
+      "stop_conditions":["DDS start blocked","fail-safe fault latched","SystemState disallows OUTPUT_ON","physical applied state cannot be established"]
+    },
+    {
+      "id":"OUTPUT_OFF_FAULT",
+      "criticality":"critical_safety",
+      "sequence":["fault/session-edge observation","latch/active fault ownership","clear upper output intent","OUT_ON=0 request","local safe-off/DCAC safe action","DDS_Stop if live","preserve protection evidence","physical applied-state supervision"],
+      "rule":"Host acknowledgement is not a prerequisite for the local safe-off handoff."
+    },
+    {
+      "id":"FAULT_CLEAR",
+      "criticality":"critical_safety",
+      "sequence":["active faults clear","explicit clear request","fresh M0 status","M0 protection clear","SystemState clear/recovery handling"],
+      "rule":"Do not clear latched evidence merely because a communication session resets."
+    }
+  ]
+}
