@@ -7,6 +7,7 @@ on:
       - feat/workbench-mvp
       - feat/workbench-v1-engineering
       - feat/engineering-data-source
+      - feat/final-workbench-integration
   pull_request:
     branches:
       - main
@@ -31,7 +32,7 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Python syntax
-        run: python -m py_compile server.py workbench/*.py tests/test_engineering_data.py
+        run: python -m py_compile server.py workbench/*.py tests/*.py
 
       - name: Engineering data JSON integrity
         run: |
@@ -52,6 +53,7 @@ jobs:
           node --check static/i18n.js
           node --check static/eng/loader.js
           node --check static/eng/common.js
+          node --check static/eng/data_source.js
           node --check static/eng/profiles.js
           node --check static/eng/control_sfra.js
           node --check static/eng/system_tools.js
