@@ -84,3 +84,10 @@
   observer.observe(document.body,{subtree:true,childList:true,characterData:true});
   applyLanguage(language);
 })();
+
+(() => {
+  const script=document.createElement('script');
+  script.src='./eng/loader.js';
+  script.defer=true;
+  document.body.append(script);
+})();

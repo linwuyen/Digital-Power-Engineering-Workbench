@@ -1,46 +1,104 @@
 # Digital Power Engineering Workbench
 
-A browser-based engineering workbench for digital-power development. The MVP intentionally connects four views of the same system: **measurement**, **control**, **firmware authority**, and **operator commands**.
+Browser-first engineering workbench for digital-power development. The project is intentionally organized around the same signal/authority path used in a real programmable power supply:
 
-The current feature branch is designed to run in two modes:
+**measurement → plant/controller → firmware policy → host protocol → operator intent → validation evidence**.
 
-- **Static browser mode** — no backend required; suitable for GitHub Pages. Measurement/control calculations and the PSU/state simulators execute locally in the browser.
-- **Python reference mode** — run `server.py`; the browser uses the Python calculation cores and deterministic mock PSU backend.
+The public GitHub Pages build runs without a backend. `server.py` provides an optional Python reference path for calculations, contract validation, protocol framing and deterministic mock validation.
 
-## MVP modules
+## Engineering v1 modules
 
-1. **Datasheet / Signal-Chain Calculator**
-   - physical quantity → sensor → op-amp → divider → ADC voltage/code
-   - inverse reconstruction back to engineering units
-   - explicit ADC clipping and quantization error
+### 1. Datasheet / Signal-Chain Calculator
 
-2. **Digital Control Visualizer**
-   - ideal CCM buck averaged control-to-output plant
-   - PI compensator
-   - computation/PWM delay approximation
-   - Bode magnitude + loop phase
-   - 0 dB crossover, phase margin and LC resonance
-   - phase unwrap before phase-margin interpolation
-   - Tustin incremental PI coefficients (`b0`, `b1`)
-   - warnings when crossover approaches `fs/10` or `fsw/10`, phase margin falls below 45°, or becomes non-positive
+- physical quantity → sensor → op-amp → divider → ADC code
+- inverse reconstruction to engineering units
+- explicit ADC clipping and quantization error
+- load/save signal-chain profiles in JSON
+- built-in profiles are **reference templates**, not verified ASR5K channel coefficients
 
-3. **Firmware State Machine Viewer**
-   - BOOT / INIT / STANDBY / PRECHARGE / SOFT_START / RUN / STOP / FAULT
-   - entry/exit conditions, PWM status, command/control/protection authority
-   - explicit authority hierarchy from UI → host → firmware → control loop → hardware protection
-   - interactive transition-policy simulator and transition history
+Truth requirement: replace reference coefficients with the actual schematic, datasheet, calibration and measured values before using results for hardware decisions.
 
-4. **Power Supply Remote Control**
-   - deterministic mock PSU only
-   - bounded 0–700 V / 0–15 A setpoint model
-   - output ON/OFF, telemetry and fault/interlock gating
-   - browser-mode OCP injection and interlock simulation
-   - command log showing accepted/rejected requests
-   - intentionally demonstrates that browser/network command authority is lower than protection authority
+### 2. Digital Control Visualizer
+
+Two model levels are available:
+
+- ideal CCM Buck + PI + delay reference model
+- topology-agnostic identified second-order plant with optional RHP zero + pole/zero controller
+
+The advanced model supports identified plant/controller parameters rather than inventing unverified Boost/PFC/PSFB/LLC equations. Use design equations or SFRA to identify the required resonance/Q/RHPZ/controller pole/zero parameters.
+
+Outputs include Bode magnitude/phase, 0 dB crossover, phase margin and model-risk warnings.
+
+### 3. SFRA Theory / Measurement Compare
+
+- CSV import (`frequency_hz,magnitude_db,phase_deg` plus common aliases)
+- log-frequency interpolation
+- theory vs measured overlay
+- RMS magnitude and phase error
+- explicit model-mismatch assessment
+
+Large theory/measurement error is treated as evidence that the analytic model should not have hardware tuning authority.
+
+### 4. Firmware State Machine + Machine-Readable Contract
+
+- existing interactive reference state viewer
+- JSON state-contract import
+- duplicate/unknown-state validation
+- reachability analysis
+- required `hardware_protection` authority boundary
+
+The contract is designed so production firmware state definitions can become explicit reviewable data instead of being inferred only from source-code control flow.
+
+### 5. Protocol Explorer
+
+Reference frame format:
+
+```text
+AA 55 | command_id:u16le | payload_len:u16le | payload | CRC16-CCITT:u16le
+```
+
+Features:
+
+- encode/decode
+- CRC validation
+- payload size limit
+- byte-level breakdown
+
+This reference framing is **not a claim about the ASR5K production SPI protocol**. Before real Host integration, import/freeze the production command map, endian rules, CRC/checksum and response/deadline contract.
+
+### 6. Web Serial Gateway
+
+The GitHub Pages application can open a browser-authorized Web Serial connection and exchange newline-delimited JSON commands with a local gateway.
+
+Reference command example:
+
+```json
+{"action":"set_voltage","value":100}
+```
+
+The gateway and DUT must independently revalidate command, range, state and timeout. Browser/network availability is never safety authority.
+
+### 7. Validation Runner
+
+JSON sequence runner currently validates deterministic mock command/state/protection policy, including:
+
+- bounded voltage/current commands
+- OUTPUT ON/OFF
+- state assertions
+- fault injection in mock mode
+- fault authority over OUTPUT_ON
+
+Real HIL PASS/FAIL must additionally include independent scope/DAQ/instrument evidence.
+
+### 8. Regression History / Reports
+
+GitHub Pages stores the latest local engineering runs in browser `localStorage` and can export JSON/CSV.
+
+A production team regression database should instead be written by CI/HIL infrastructure with immutable commit/build/test metadata.
 
 ## Run locally
 
-Requires Python 3.10+ and no third-party runtime dependencies.
+Python 3.10+; no third-party runtime dependency is required for the reference backend.
 
 ```bash
 python server.py
@@ -48,82 +106,89 @@ python server.py
 
 Open `http://localhost:8000`.
 
-The header should report **PYTHON REFERENCE** when the backend is detected.
+## GitHub Pages
 
-## Static / GitHub Pages mode
-
-The repository root contains `index.html`, which redirects to the self-contained static application under `static/`. No Python server is required in this mode.
-
-After this branch is merged, GitHub Pages can serve the repository root directly. The header should report **STATIC BROWSER** and **standalone ready**.
-
-Static mode is intentionally useful for calculations, visualization and policy simulation only. It does not create a real hardware transport.
+The repository root redirects to `static/`. The browser app loads the engineering v1 modules from `static/eng/` and requires no server for calculations, SFRA comparison, contracts, protocol exploration, mock validation or report export.
 
 ## Verification
 
-Regression tests:
-
 ```bash
 python -m unittest discover -s tests -v
-```
-
-Syntax checks:
-
-```bash
 python -m py_compile server.py workbench/*.py
 node --check static/app.js
+node --check static/i18n.js
+node --check static/eng/loader.js
+node --check static/eng/common.js
+node --check static/eng/profiles.js
+node --check static/eng/control_sfra.js
+node --check static/eng/system_tools.js
 ```
 
-`.github/workflows/ci.yml` contains the same checks for GitHub Actions. At the time the workflow was first added on the feature branch, GitHub had not yet produced a workflow run, so do not treat CI as proven until an Actions run reports PASS.
+GitHub Actions runs the same verification.
 
-## Safety / evidence boundary
+## Safety / authority boundary
 
-This repository is an engineering visualization and host-tool prototype. The included remote-control path uses a mock transport. It must not be treated as a protection layer or connected to production hardware without a reviewed protocol adapter and device-side validation.
+This repository is an engineering tool, not a protection layer.
 
-For a real power supply, OVP/OCP/OTP, PWM trip, emergency shutdown and interlock authority must remain local and deterministic in hardware/firmware. Network/UI availability must never be required to reach a safe state.
+For real hardware, the following must remain local and deterministic in firmware/hardware:
 
-The control visualizer uses an ideal averaged CCM buck model. It does **not** yet include capacitor ESR, inductor DCR, PWM modulator gain normalization, current-loop interaction, right-half-plane zeros, sampled-data effects beyond the configured pure delay, saturation/anti-windup, quantization or nonlinear operating-point changes. Validate plant parameters, controller scaling and delay against SFRA or measured loop gain before controller changes reach hardware.
+- OVP
+- OCP
+- OTP
+- PWM trip
+- interlock
+- emergency shutdown
 
-## Architecture
-
-```text
-Browser UI
-   │
-   ├── static mode ────────> local JavaScript engineering models
-   │
-   └── Python mode ────────> server.py
-                              │
-                              ├── Measurement calculator ──> workbench.measurement
-                              ├── Control visualizer ──────> workbench.control
-                              ├── State viewer ────────────> workbench.state_machine
-                              └── Remote console ──────────> workbench.remote (MOCK)
-                                                           │
-                                                           └── future reviewed protocol adapter
-                                                                └── device firmware command gate
-                                                                     └── local protection authority
-```
+The browser and host are allowed to express **operator intent** only. They do not own protection authority.
 
 ## Engineering truth hierarchy
 
-When results disagree, use this priority:
+When sources disagree, use this order:
 
-1. measured hardware / calibrated instrument evidence
-2. production firmware behavior and explicit interface contracts
-3. Python reference model in `workbench/`
-4. browser static model
-5. documentation/examples
+1. calibrated hardware measurements / independent instruments
+2. production firmware behavior and frozen interface contracts
+3. Python reference models in `workbench/`
+4. browser models under `static/`
+5. documentation/examples/reference templates
 
-The browser model should remain numerically aligned with the Python model, but it is a convenience execution path rather than the source of truth.
+## Repository architecture
 
-## Next engineering increments
+```text
+GitHub Pages / Browser
+├─ Measurement + JSON profiles
+├─ Buck reference control model
+├─ Identified plant / pole-zero control lab
+├─ SFRA CSV comparison
+├─ State-contract validator
+├─ Protocol explorer
+├─ Web Serial reference gateway
+├─ Validation runner
+└─ Local history / export
 
-- load/save signal-chain profiles for real ADC/DAC/current-sensor front ends
-- add tolerance / worst-case stack-up and calibration coefficients
-- add Boost/PFC/PSFB/LLC plant models and discrete controller variants
-- import measured SFRA CSV and overlay theory vs measurement
-- import firmware state definitions from a machine-readable contract
-- add transport abstraction for serial/Ethernet gateways while preserving firmware-side command gating
-- add test-sequence runner and report generation
+Python reference backend
+├─ workbench.measurement
+├─ workbench.profiles
+├─ workbench.control
+├─ workbench.control_advanced
+├─ workbench.sfra
+├─ workbench.contracts
+├─ workbench.protocol
+├─ workbench.state_machine
+├─ workbench.remote
+└─ workbench.validation
+```
+
+## What still requires project-specific truth
+
+The software framework is intentionally complete enough to accept the missing production facts, but these facts cannot be safely guessed:
+
+- real ASR5K ADC/DAC/current/voltage channel coefficients
+- production AM3352 ↔ C2000 command IDs/frame/checksum/deadlines
+- real PSFB/LLC/PFC operating-point plant parameters
+- real HIL instrument transport and pass/fail tolerances
+
+Those items should be imported as reviewed profiles/contracts or measured SFRA data, not hard-coded from assumptions.
 
 ## Repository policy
 
-Development should occur on feature branches and merge through pull requests. Keep calculation cores pure/testable; keep hardware transport behind an explicit boundary.
+Develop on feature branches, verify in CI, merge through PRs, and keep hardware transport behind an explicit authority boundary.
