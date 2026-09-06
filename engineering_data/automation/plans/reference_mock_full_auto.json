@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "id": "AUTO-REFERENCE-MOCK-001",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "mode": "simulation",
+  "requirements": ["REQ-SPIB-001"],
+  "preflight": {
+    "production_repo_required": false,
+    "require_clean_production_repo": false
+  },
+  "steps": [
+    {
+      "id": "mock_hil",
+      "op": "hil",
+      "plan": "engineering_data/hil/reference_mock_plan.json",
+      "mode": "mock"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "pinned_source_snapshot",
+      "root": "{workbench_repo}",
+      "glob": "engineering_data/source_truth/snapshot-2b72f506.json",
+      "required": true,
+      "role": "reference_only"
+    }
+  ],
+  "evidence_claims": [
+    {
+      "id": "mock_spib_contract",
+      "test_id": "AUTO-REFERENCE-MOCK-001",
+      "requirement_ids": ["REQ-SPIB-001"],
+      "depends_on_steps": ["mock_hil"],
+      "artifact": "pinned_source_snapshot",
+      "physical_evidence_required": false
+    }
+  ]
+}

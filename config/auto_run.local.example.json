@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "production_repo": "../ASR5K_v2_28384",
+  "archive_root": ".engineering_local/archive",
+  "runtime_root": ".engineering_local/runtime",
+  "allow_hardware": false,
+  "gateway_command": null,
+  "collect_settle_seconds": 1.0,
+  "collectors": [
+    {
+      "id": "scope",
+      "path": ".engineering_local/inbox/scope",
+      "patterns": ["*.csv", "*.png", "*.jpg"],
+      "recursive": true
+    },
+    {
+      "id": "sfra",
+      "path": ".engineering_local/inbox/sfra",
+      "patterns": ["*.csv", "*.txt", "*.json"],
+      "recursive": true
+    },
+    {
+      "id": "logic",
+      "path": ".engineering_local/inbox/logic",
+      "patterns": ["*.csv", "*.txt", "*.vcd", "*.json"],
+      "recursive": true
+    },
+    {
+      "id": "logs",
+      "path": ".engineering_local/inbox/logs",
+      "patterns": ["*.log", "*.txt", "*.json"],
+      "recursive": true
+    }
+  ],
+  "publish": {
+    "mode": "commit",
+    "push": false,
+    "message_template": "evidence: {run_id} {plan_id}"
+  }
+}
