@@ -10,6 +10,7 @@ on:
       - feat/final-workbench-integration
       - feat/engineering-memory-ssot
       - feat/engineering-os-automation
+      - feat/full-auto-evidence-pipeline
   pull_request:
     branches:
       - main
@@ -67,6 +68,22 @@ jobs:
               run = json.load(f)
           assert run['result'] == 'SIMULATION_PASS'
           assert run['qualification_claimed'] is False
+          PY
+
+      - name: Full-auto end-to-end smoke remains non-qualifying in simulation
+        run: |
+          python tools/auto_run.py --config config/auto_run.ci.json run AUTO-REFERENCE-MOCK-001 > /tmp/auto-run.txt
+          cat /tmp/auto-run.txt
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          latest = json.loads(Path('.engineering_local/ci-runtime/latest_run.json').read_text())
+          assert latest['result'] == 'COMPLETED_UNQUALIFIED'
+          assert latest['qualification_claimed'] is False
+          assert latest['evidence_ids']
+          archive = Path(latest['archive_path'])
+          assert (archive / 'manifest.json').exists()
+          assert (archive / 'summary.json').exists()
           PY
 
       - name: Reject drift from pinned exact-source snapshot

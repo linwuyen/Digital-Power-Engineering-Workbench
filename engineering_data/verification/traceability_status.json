@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "summary": {
+    "ARCHITECTURE_CONTRACT_ONLY": 1,
+    "BLOCKED_PENDING_EVIDENCE": 3,
+    "NOT_CLAIMED": 1,
+    "SOURCE_VERIFIED_ONLY": 6
+  },
+  "requirements": [
+    {"id":"REQ-SPIB-001","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-SPIB-002","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-SPIB-003","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-HOST-001","owner":"CPU1 Host Command","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/command_dictionary.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-AUTH-001","owner":"System architecture","trust":"governance_contract","status":"ARCHITECTURE_CONTRACT_ONLY","implementation_refs":["engineering_data/architecture/ownership_matrix.json","engineering_data/ai/safety_invariants.json"],"verification_refs":["tests/test_final_integration.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-STATE-001","owner":"CPU1 SystemState","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/firmware/state_machine.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-SCAL-001","owner":"CPU1 SPIB control register contract","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/protocol/command_dictionary.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-ADC-001","owner":"Measurement chain","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/hardware/signal_dictionary.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-TIMING-001","owner":"CPU1 SPIB timing","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/timing/timing_budget.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-PROT-001","owner":"Protection architecture","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/protection/protection_matrix.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
+    {"id":"REQ-QUAL-001","owner":"Verification","trust":"not_claimed","status":"NOT_CLAIMED","implementation_refs":["engineering_data/verification/verification_matrix.json","engineering_data/evidence/evidence_ledger.jsonl"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]}
+  ],
+  "orphan_evidence_requirement_refs": [],
+  "policy": "Only exact-baseline PASS evidence linked by requirement_id upgrades a requirement to QUALIFIED_BY_EVIDENCE."
+}
