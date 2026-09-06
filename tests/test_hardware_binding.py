@@ -78,13 +78,20 @@ class HardwareBindingTest(unittest.TestCase):
             (p/".cproject").write_text("<?xml version='1.0'?><cproject><configuration artifactExtension='out' artifactName='${ProjName}' name='FLASH'/><option name='Compiler version' value='22.6.1.LTS'/><listOptionValue value='PRODUCTS=C2000WARE:5.4.0.00;'/></cproject>")
             actual=hardware_bind.parse_project(p); self.assertEqual(actual["project_name"],"P"); self.assertIn("FLASH",actual["configurations"]); self.assertIn("22.6.1.LTS",actual["compilers"]); self.assertEqual(actual["artifacts"][0]["extension"],"out")
 
-    def test_canonical_build_plans_require_exact_out_artifact(self):
-        plans=ROOT/"engineering_data/automation/plans"
-        for name,req,artifact in (("cpu1_build.json","REQ-BUILD-CPU1-001","ASR5K_F28384D_CPU1.out"),("cpu2_build.json","REQ-BUILD-CPU2-001","ASR5K_F28384D_CPU2.out"),("m0_build.json","REQ-BUILD-M0-001","ASR5K_M0G3519.out")):
-            plan=json.loads((plans/name).read_text()); self.assertEqual(plan["mode"],"build"); self.assertEqual(plan["baseline"],BASELINE); self.assertIn(req,plan["requirements"]); self.assertTrue(any(artifact in row["glob"] for row in plan["artifacts"])); auto_run_ext.validate_plan(plan)
+    def test_canonical_build_plans_are_frozen_legacy_snapshot_data(self):
+        registry = json.loads((ROOT / "engineering_data/federation/deprecation_registry.json").read_text())
+        paths = {item["path"]: item for item in registry["items"]}
+        self.assertEqual(paths["engineering_data/automation/"]["status"], "frozen_legacy_snapshot_contracts")
+        self.assertEqual(paths["engineering_data/automation/"]["replacement_owner"], "linwuyen/ASR5K_v2_28384")
+        self.assertIn("production_build_owner", registry["forbidden_new_workbench_authority"])
 
-    def test_windows_entrypoint_exposes_bind(self):
-        text=(ROOT/"asrtest.ps1").read_text(); self.assertIn('$CommandArgs[0] -eq "bind"',text); self.assertIn("hardware_bind.py",text); self.assertIn("auto_run_ext.py",text)
+    def test_windows_entrypoint_is_deprecated_execution_path(self):
+        text=(ROOT/"asrtest.ps1").read_text()
+        self.assertIn("execution entrypoint is deprecated", text)
+        self.assertIn("View / Analysis Plane", text)
+        self.assertIn("linwuyen/ASR5K_v2_28384", text)
+        self.assertNotIn("auto_run_ext.py", text)
+        self.assertNotIn("hardware_bind.py", text)
 
 
 if __name__ == "__main__":
