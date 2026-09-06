@@ -1,25 +1,23 @@
 {
-  "schema_version": "1.0",
   "baseline": "2b72f50648d86c11547645882248eed69f12892f",
-  "summary": {
-    "ARCHITECTURE_CONTRACT_ONLY": 1,
-    "BLOCKED_PENDING_EVIDENCE": 3,
-    "NOT_CLAIMED": 1,
-    "SOURCE_VERIFIED_ONLY": 6
-  },
-  "requirements": [
-    {"id":"REQ-SPIB-001","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-SPIB-002","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-SPIB-003","owner":"CPU1 SPIB","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/host_protocol.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-HOST-001","owner":"CPU1 Host Command","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/protocol/command_dictionary.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-AUTH-001","owner":"System architecture","trust":"governance_contract","status":"ARCHITECTURE_CONTRACT_ONLY","implementation_refs":["engineering_data/architecture/ownership_matrix.json","engineering_data/ai/safety_invariants.json"],"verification_refs":["tests/test_final_integration.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-STATE-001","owner":"CPU1 SystemState","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/firmware/state_machine.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-SCAL-001","owner":"CPU1 SPIB control register contract","trust":"verified_source","status":"SOURCE_VERIFIED_ONLY","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/protocol/command_dictionary.json"],"verification_refs":["tests/test_engineering_data.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-ADC-001","owner":"Measurement chain","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/hardware/signal_dictionary.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-TIMING-001","owner":"CPU1 SPIB timing","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/timing/timing_budget.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-PROT-001","owner":"Protection architecture","trust":"pending_verification","status":"BLOCKED_PENDING_EVIDENCE","implementation_refs":["engineering_data/protection/protection_matrix.json"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]},
-    {"id":"REQ-QUAL-001","owner":"Verification","trust":"not_claimed","status":"NOT_CLAIMED","implementation_refs":["engineering_data/verification/verification_matrix.json","engineering_data/evidence/evidence_ledger.jsonl"],"verification_refs":["tests/test_engineering_memory.py"],"evidence_ids":[],"stale_or_other_baseline_evidence_ids":[]}
-  ],
   "orphan_evidence_requirement_refs": [],
-  "policy": "Only exact-baseline PASS evidence linked by requirement_id upgrades a requirement to QUALIFIED_BY_EVIDENCE."
+  "policy": "Only exact-baseline PASS evidence linked by requirement_id upgrades a requirement to QUALIFIED_BY_EVIDENCE.",
+  "requirements": [
+    {"evidence_ids":[],"id":"REQ-SPIB-001","implementation_refs":["engineering_data/protocol/host_protocol.json"],"owner":"CPU1 SPIB","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-SPIB-002","implementation_refs":["engineering_data/protocol/host_protocol.json"],"owner":"CPU1 SPIB","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-SPIB-003","implementation_refs":["engineering_data/protocol/host_protocol.json"],"owner":"CPU1 SPIB","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-HOST-001","implementation_refs":["engineering_data/protocol/command_dictionary.json"],"owner":"CPU1 Host Command","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-AUTH-001","implementation_refs":["engineering_data/architecture/ownership_matrix.json","engineering_data/ai/safety_invariants.json"],"owner":"System architecture","stale_or_other_baseline_evidence_ids":[],"status":"ARCHITECTURE_CONTRACT_ONLY","trust":"governance_contract","verification_refs":["tests/test_final_integration.py"]},
+    {"evidence_ids":[],"id":"REQ-STATE-001","implementation_refs":["engineering_data/firmware/state_machine.json"],"owner":"CPU1 SystemState","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-SCAL-001","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/protocol/command_dictionary.json"],"owner":"CPU1 SPIB control register contract","stale_or_other_baseline_evidence_ids":[],"status":"SOURCE_VERIFIED_ONLY","trust":"verified_source","verification_refs":["tests/test_engineering_data.py"]},
+    {"evidence_ids":[],"id":"REQ-ADC-001","implementation_refs":["engineering_data/firmware/scaling.json","engineering_data/hardware/signal_dictionary.json"],"owner":"Measurement chain","stale_or_other_baseline_evidence_ids":[],"status":"BLOCKED_PENDING_EVIDENCE","trust":"pending_verification","verification_refs":["tests/test_engineering_memory.py"]},
+    {"evidence_ids":[],"id":"REQ-TIMING-001","implementation_refs":["engineering_data/timing/timing_budget.json"],"owner":"CPU1 SPIB timing","stale_or_other_baseline_evidence_ids":[],"status":"BLOCKED_PENDING_EVIDENCE","trust":"pending_verification","verification_refs":["tests/test_engineering_memory.py"]},
+    {"evidence_ids":[],"id":"REQ-PROT-001","implementation_refs":["engineering_data/protection/protection_matrix.json"],"owner":"Protection architecture","stale_or_other_baseline_evidence_ids":[],"status":"BLOCKED_PENDING_EVIDENCE","trust":"pending_verification","verification_refs":["tests/test_engineering_memory.py"]},
+    {"evidence_ids":[],"id":"REQ-QUAL-001","implementation_refs":["engineering_data/verification/verification_matrix.json","engineering_data/evidence/evidence_ledger.jsonl"],"owner":"Verification","stale_or_other_baseline_evidence_ids":[],"status":"NOT_CLAIMED","trust":"not_claimed","verification_refs":["tests/test_engineering_memory.py"]},
+    {"evidence_ids":[],"id":"REQ-BUILD-CPU1-001","implementation_refs":["engineering_data/automation/asr5k_build_contract.json","engineering_data/automation/plans/cpu1_build.json"],"owner":"CPU1 build","stale_or_other_baseline_evidence_ids":[],"status":"NOT_CLAIMED","trust":"not_claimed","verification_refs":["tests/test_hardware_binding.py"]},
+    {"evidence_ids":[],"id":"REQ-BUILD-CPU2-001","implementation_refs":["engineering_data/automation/asr5k_build_contract.json","engineering_data/automation/plans/cpu2_build.json"],"owner":"CPU2 build","stale_or_other_baseline_evidence_ids":[],"status":"NOT_CLAIMED","trust":"not_claimed","verification_refs":["tests/test_hardware_binding.py"]},
+    {"evidence_ids":[],"id":"REQ-BUILD-M0-001","implementation_refs":["engineering_data/automation/asr5k_build_contract.json","engineering_data/automation/plans/m0_build.json"],"owner":"M0 build","stale_or_other_baseline_evidence_ids":[],"status":"NOT_CLAIMED","trust":"not_claimed","verification_refs":["tests/test_hardware_binding.py"]}
+  ],
+  "schema_version": "1.0",
+  "summary": {"ARCHITECTURE_CONTRACT_ONLY":1,"BLOCKED_PENDING_EVIDENCE":3,"NOT_CLAIMED":4,"SOURCE_VERIFIED_ONLY":6}
 }

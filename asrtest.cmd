@@ -1,8 +1,14 @@
 @echo off
 where py >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
-  py "%~dp0tools\auto_run.py" %*
+  set "PY=py"
 ) else (
-  python "%~dp0tools\auto_run.py" %*
+  set "PY=python"
+)
+if /I "%~1"=="bind" (
+  shift
+  %PY% "%~dp0tools\hardware_bind.py" %*
+) else (
+  %PY% "%~dp0tools\auto_run_ext.py" %*
 )
 exit /b %ERRORLEVEL%

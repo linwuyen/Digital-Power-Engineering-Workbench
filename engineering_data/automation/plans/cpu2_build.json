@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "id": "ASR5K-CPU2-BUILD-001",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "mode": "build",
+  "requirements": ["REQ-BUILD-CPU2-001"],
+  "preflight": {"production_repo_required": true, "require_clean_production_repo": true},
+  "steps": [{"id": "build_cpu2", "op": "command", "command": ["{python}", "{workbench_repo}/tools/ccs_build.py", "--project", "cpu2", "--config", "{workbench_repo}/.engineering_local/auto_run.json", "--workspace", "{run_dir}/ccs-workspace-cpu2", "--out", "{run_dir}/results/cpu2_build.json"], "cwd": "{workbench_repo}", "timeout_seconds": 900, "accepted_exit_codes": [0]}],
+  "artifacts": [{"id": "cpu2_out", "root": "{production_repo}/ASR5K_F28384D_CPU2", "glob": "**/ASR5K_F28384D_CPU2.out", "required": true, "role": "exact_build_binary"}],
+  "evidence_claims": [{"id": "cpu2_exact_build", "test_id": "ASR5K-CPU2-BUILD-001", "requirement_ids": ["REQ-BUILD-CPU2-001"], "depends_on_steps": ["build_cpu2"], "artifact": "cpu2_out", "physical_evidence_required": false, "source_or_instrument": "TI Code Composer Studio headless build"}]
+}

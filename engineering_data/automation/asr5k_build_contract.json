@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K exact-baseline CCS build contract",
+  "baseline": {
+    "repository": "linwuyen/ASR5K_v2_28384",
+    "branch": "feat/voltage-slew-runtime-complete",
+    "commit": "2b72f50648d86c11547645882248eed69f12892f"
+  },
+  "trust": "verified_source",
+  "qualification_boundary": "Project metadata and a successful CLI exit are not qualification by themselves. PASS requires the generated .out SHA-256 and an exact-baseline evidence record.",
+  "projects": {
+    "cpu1": {
+      "project_path": "ASR5K_F28384D_CPU1",
+      "project_name": "ASR5K_F28384D_CPU1",
+      "configuration": "FLASH",
+      "artifact_name": "ASR5K_F28384D_CPU1.out",
+      "artifact_extension": "out",
+      "compiler": "22.6.1.LTS",
+      "products": {"C2000WARE": "5.4.0.00", "sysconfig": "1.28.0"},
+      "device": "TMS320F28384D",
+      "core": "C28xx_CPU1",
+      "source_path": "ASR5K_F28384D_CPU1/.cproject",
+      "source_url": "https://github.com/linwuyen/ASR5K_v2_28384/blob/2b72f50648d86c11547645882248eed69f12892f/ASR5K_F28384D_CPU1/.cproject"
+    },
+    "cpu2": {
+      "project_path": "ASR5K_F28384D_CPU2",
+      "project_name": "ASR5K_F28384D_CPU2",
+      "configuration": "FLASH",
+      "artifact_name": "ASR5K_F28384D_CPU2.out",
+      "artifact_extension": "out",
+      "compiler": "22.6.1.LTS",
+      "products": {"C2000WARE": "5.4.0.00"},
+      "device": "TMS320F28384D",
+      "core": "C28xx_CPU2",
+      "source_path": "ASR5K_F28384D_CPU2/.cproject",
+      "source_url": "https://github.com/linwuyen/ASR5K_v2_28384/blob/2b72f50648d86c11547645882248eed69f12892f/ASR5K_F28384D_CPU2/.cproject"
+    },
+    "m0": {
+      "project_path": "ASR5K_M0G3519",
+      "project_name": "ASR5K_M0G3519",
+      "configuration": "Debug",
+      "artifact_name": "ASR5K_M0G3519.out",
+      "artifact_extension": "out",
+      "compiler": "TICLANG_3.2.2.LTS",
+      "products": {"MSPM0-SDK": "2.8.0.03", "sysconfig": "1.25.0"},
+      "device": "MSPM0G3519",
+      "core": "Cortex-M0+",
+      "source_path": "ASR5K_M0G3519/.cproject",
+      "source_url": "https://github.com/linwuyen/ASR5K_v2_28384/blob/2b72f50648d86c11547645882248eed69f12892f/ASR5K_M0G3519/.cproject"
+    }
+  },
+  "cli_contract": {
+    "eclipse": {"executable_family": "eclipsec", "import_application": "com.ti.ccstudio.apps.projectImport", "build_application": "com.ti.ccstudio.apps.projectBuild", "workspace_flag": "-data"},
+    "server": {"executable_family": "ccs-server-cli", "import_application": "com.ti.ccs.apps.importProject", "build_application": "com.ti.ccs.apps.buildProject", "workspace_flag": "-workspace"},
+    "authority": "TI Code Composer Studio command-line project documentation",
+    "note": "The binder probes the installed CLI with -ccs.help before any real build. Unsupported CLI variants fail closed.",
+    "documentation": {
+      "eclipse": "https://software-dl.ti.com/ccs/esd/documents/ccs_projects-command-line.html",
+      "server": "https://software-dl.ti.com/ccs/esd/documents/ccs_project-command-line.html"
+    }
+  },
+  "flash_binding": {"status": "pending_local_detection", "dslite_path": null, "target_config_ccxml": null, "reason": "No production .ccxml or flash invocation is established by the exact source baseline; local discovery must be unambiguous."},
+  "hil_gateway_binding": {"status": "pending_local_detection", "gateway_command": null, "reason": "No production process-JSONL gateway command is established by the exact source baseline. The existing process adapter is a harness contract, not production SPIB framing."}
+}
