@@ -29,6 +29,8 @@ class EngineeringMemorySsotTest(unittest.TestCase):
                 self.assertTrue((DATA / relative).is_file())
         self.assertTrue(index["consumer_policy"]["pass_claim_requires_evidence_ledger_record"])
         self.assertFalse(index["consumer_policy"]["test_file_presence_is_pass"])
+        self.assertFalse(index["authoritative_engineering_truth"])
+        self.assertEqual(index["role"], "view_analysis_plane_snapshot")
 
     def test_requirement_ledger_is_baseline_bound_and_traceable(self):
         ledger = load_json("requirements/requirement_ledger.json")
@@ -83,11 +85,14 @@ class EngineeringMemorySsotTest(unittest.TestCase):
         self.assertEqual(meta["status"], "no_result_claimed")
         self.assertTrue(meta["append_only"])
 
-    def test_current_status_exists_and_carries_baseline(self):
+    def test_current_status_marks_dataset_as_historical_snapshot(self):
         status = (ROOT / "docs/CURRENT_STATUS.md").read_text(encoding="utf-8")
         self.assertIn(BASELINE, status)
-        self.assertIn("Explicit pending verification", status)
-        self.assertIn("Definition of Done", status)
+        self.assertIn("DERIVED_SNAPSHOT", status)
+        self.assertIn("historical_snapshot", status)
+        self.assertIn("View / Analysis Plane", status)
+        self.assertIn("ASR5K_AGENT", status)
+        self.assertIn("ASR5K_v2_28384", status)
 
 
 if __name__ == "__main__":
