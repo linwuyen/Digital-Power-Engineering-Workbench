@@ -6,6 +6,32 @@ Browser-first engineering workbench for digital-power development. The project i
 
 The public GitHub Pages build runs without a backend. `server.py` provides an optional Python reference path for calculations, contract validation, protocol framing and deterministic mock validation.
 
+## Repository role
+
+Workbench is the **View / Analysis Plane** for ASR5K. It is not the Control Plane and not the Execution Plane.
+
+```text
+linwuyen/ASR5K_AGENT
+= Control / Knowledge Plane
+= product intent, architecture, decisions, durable status, evidence rules
+
+linwuyen/ASR5K_v2_28384
+= Execution Plane
+= exact firmware, build/test/flash/HIL/qualification execution, artifact/evidence identity
+
+linwuyen/Digital-Power-Engineering-Workbench
+= View / Analysis Plane
+= visualization, calculators, derived snapshots, evidence/status views
+```
+
+The canonical Workbench federation manifest is:
+
+```text
+engineering_data/federation/source_manifest.json
+```
+
+Workbench must fail closed when current owner-repository identity cannot be established. A historical snapshot is never presented as current production truth.
+
 ## Engineering v1 modules
 
 ### 1. Datasheet / Signal-Chain Calculator
@@ -41,13 +67,13 @@ Large theory/measurement error is treated as evidence that the analytic model sh
 
 ### 4. Firmware State Machine + Machine-Readable Contract
 
-- existing interactive reference state viewer
+- interactive state viewer
 - JSON state-contract import
 - duplicate/unknown-state validation
 - reachability analysis
 - required `hardware_protection` authority boundary
 
-The contract is designed so production firmware state definitions can become explicit reviewable data instead of being inferred only from source-code control flow.
+Any ASR5K production state view is limited by the identity and completeness of the imported source snapshot. The full production transition graph must not be invented from a partial snapshot.
 
 ### 5. Protocol Explorer
 
@@ -64,7 +90,7 @@ Features:
 - payload size limit
 - byte-level breakdown
 
-This demo framing is **not the ASR5K production SPI protocol**. The evidence-bound production SPIB contract is now indexed separately under `engineering_data/protocol/`: 32-bit address/data request, next-master-transaction response, `0xFFFF0000` NULL frame, additive response checksum semantics, and only the scalar register addresses proven by the pinned production source.
+This demo framing is **not the ASR5K production SPI protocol**. Historical evidence-bound SPIB facts may be displayed from the pinned Workbench snapshot, but current protocol truth must be resolved from the owning ASR5K contract and exact firmware state.
 
 ### 6. Web Serial Gateway
 
@@ -80,55 +106,45 @@ The gateway and DUT must independently revalidate command, range, state and time
 
 ### 7. Validation Runner
 
-JSON sequence runner currently validates deterministic mock command/state/protection policy, including:
+JSON sequence runner validates deterministic mock command/state/protection policy. Simulation results are reference-tool results only; they are not firmware build, flash, board, HIL, or Production qualification evidence.
 
-- bounded voltage/current commands
-- OUTPUT ON/OFF
-- state assertions
-- fault injection in mock mode
-- fault authority over OUTPUT_ON
-
-Real HIL PASS/FAIL must additionally include independent scope/DAQ/instrument evidence.
+Production execution and qualification ownership is in `linwuyen/ASR5K_v2_28384`.
 
 ### 8. Regression History / Reports
 
-GitHub Pages stores the latest local engineering runs in browser `localStorage` and can export JSON/CSV.
+GitHub Pages can store local engineering runs in browser `localStorage` and export JSON/CSV. These are convenience records, not the authoritative ASR5K qualification archive.
 
-A production team regression database should instead be written by CI/HIL infrastructure with immutable commit/build/test metadata.
+## ASR5K Federated Data / Derived Snapshot
 
-## ASR5K Engineering Data Source
+`engineering_data/` is the Workbench's **derived snapshot / normalization cache**. It exists to make engineering data easy to render and query; it does not override `ASR5K_AGENT` or `ASR5K_v2_28384`.
 
-`engineering_data/` is the evidence-bound truth/index layer for Workbench, AI agents, host/HIL tools and future report generators.
+Start at:
 
-Current dataset baseline:
+```text
+engineering_data/federation/source_manifest.json
+engineering_data/index.json
+```
+
+Current checked-in Workbench snapshot:
 
 ```text
 repository: linwuyen/ASR5K_v2_28384
 branch:     feat/voltage-slew-runtime-complete
 commit:     2b72f50648d86c11547645882248eed69f12892f
+freshness:  historical_snapshot
 ```
 
-Start at:
+That identity is intentionally retained for reproducible historical rendering. It is **not** the live firmware head. Current firmware state must be re-queried from the Execution Plane.
+
+The snapshot normalizes items such as architecture/ownership, state/fault vocabulary, selected protocol/register facts, explicit unknowns, and historical verification boundaries. Unknown values remain `null` / pending rather than guessed.
+
+Legacy Workbench execution helpers created before three-repository convergence are listed in:
 
 ```text
-engineering_data/index.json
+engineering_data/federation/deprecation_registry.json
 ```
 
-The dataset normalizes:
-
-- exact baseline identity
-- architecture and C28/MSPM0 ownership
-- SystemState/fault vocabulary and critical paths
-- verified signal names and explicit unknown scaling
-- protection facts and explicit unknown thresholds/latencies
-- SPIB host wire contract and verified scalar registers
-- verification/test catalogs without false PASS claims
-- AI safety invariants and commit-pinned evidence links
-- empty hardware/regression ledgers that only accept evidence-bound future results
-
-Trust values are explicit: `verified_source`, `governance_contract`, `derived`, or `pending_verification`. A `null` pending value is intentional and must never be silently replaced by zero, one, a legacy register or a guessed datasheet value.
-
-This repository does not modify the production ASR5K source. The generated data is a derived navigation/normalization layer and cannot override higher-tier design or production-source authority.
+They are compatibility/history only. New production build, flash, physical HIL, artifact-capture, or qualification execution belongs in `ASR5K_v2_28384`.
 
 ## Run locally
 
@@ -142,31 +158,30 @@ Open `http://localhost:8000`.
 
 ## GitHub Pages
 
-The repository root redirects to `static/`. The browser app loads the engineering v1 modules from `static/eng/` and requires no server for calculations, SFRA comparison, contracts, protocol exploration, mock validation or report export.
+The repository root redirects to `static/`. The browser app loads the engineering modules from `static/eng/` and requires no server for calculations, SFRA comparison, contracts, protocol exploration, mock validation or report export.
 
-Static engineering-data JSON is also published by GitHub Pages, with `engineering_data/index.json` as the stable discovery endpoint.
+Static derived-snapshot JSON is also published by GitHub Pages.
 
 ## Verification
 
 ```bash
 python -m unittest discover -s tests -v
-python -m py_compile server.py workbench/*.py tests/test_engineering_data.py
+python -m py_compile server.py workbench/*.py tools/*.py tests/*.py
 node --check static/app.js
 node --check static/i18n.js
 node --check static/eng/loader.js
 node --check static/eng/common.js
+node --check static/eng/data_source.js
 node --check static/eng/profiles.js
 node --check static/eng/control_sfra.js
 node --check static/eng/system_tools.js
 ```
 
-GitHub Actions runs the same verification and additionally parses every JSON file under `engineering_data/`.
-
 ## Safety / authority boundary
 
 This repository is an engineering tool, not a protection layer.
 
-For real hardware, the following must remain local and deterministic in firmware/hardware:
+For real hardware, the following remain local and deterministic in firmware/hardware:
 
 - OVP
 - OCP
@@ -177,39 +192,43 @@ For real hardware, the following must remain local and deterministic in firmware
 
 The browser and host are allowed to express **operator intent** only. They do not own protection authority.
 
-## Engineering truth hierarchy
+## Engineering authority hierarchy
 
-When sources disagree, use this order:
+When sources disagree, route by ownership instead of treating Workbench as an authority:
 
-1. current explicit instruction / formal design documents
-2. exact production firmware behavior and frozen interface contracts
-3. active architecture contracts, with their baseline caveat
-4. calibrated hardware measurements / qualification evidence bound to exact artifacts
-5. derived `engineering_data/` index
-6. Python/browser reference models and examples
+1. current explicit owner instruction;
+2. `ASR5K_AGENT` approved ACTIVE contract / ADR / decision for product intent;
+3. exact `ASR5K_v2_28384` source for current implementation truth;
+4. exact execution / artifact / flash / board / HIL evidence for the claim being made;
+5. Workbench `engineering_data/` derived snapshot for navigation / visualization only;
+6. Python/browser reference models and examples.
+
+Exact-SHA evidence never transfers to a different SHA by inference.
 
 ## Repository architecture
 
 ```text
-GitHub Pages / Browser
+Federated owners
+├─ ASR5K_AGENT          Control / Knowledge Plane
+├─ ASR5K_v2_28384       Execution Plane
+└─ Workbench            View / Analysis Plane
+
+Workbench GitHub Pages / Browser
 ├─ Measurement + JSON profiles
-├─ Buck reference control model
-├─ Identified plant / pole-zero control lab
-├─ SFRA CSV comparison
-├─ State-contract validator
-├─ Protocol explorer
+├─ Control / Bode / SFRA analysis
+├─ State / protocol views
+├─ Evidence / status views
 ├─ Web Serial reference gateway
-├─ Validation runner
 └─ Local history / export
 
-Engineering truth/index layer
+Derived snapshot / cache
+├─ engineering_data/federation
 ├─ engineering_data/architecture
 ├─ engineering_data/firmware
 ├─ engineering_data/protocol
 ├─ engineering_data/control
 ├─ engineering_data/verification
-├─ engineering_data/baselines
-└─ engineering_data/ai
+└─ engineering_data/source_truth
 
 Python reference backend
 ├─ workbench.measurement
@@ -226,17 +245,8 @@ Python reference backend
 
 ## Explicit pending verification
 
-The data-source framework is complete, but evidence that was not established is intentionally represented as `null` / `pending_verification` rather than guessed. Current important pending facts include:
-
-- real ASR5K ADC current/voltage/temperature channel scaling and calibration coefficients
-- complete AM3352 ↔ C2000 register/telemetry map beyond the extracted authoritative scalar registers
-- formal numerical SPIB response-deadline acceptance limit
-- measured hardware protection shutdown latency
-- production PSFB/LLC/PFC plant/controller/SFRA operating-point package
-- exact board/HIL/AM3352 A/B qualification records for the pinned baseline
-
-Promote a pending value only when exact source, schematic/calibration, or measured evidence is added and bound to the relevant baseline/artifact.
+Historical Workbench pending items remain useful as a view of the pinned snapshot, but they are not the authoritative current backlog. Current blockers and current qualification state belong to `ASR5K_AGENT` and exact Execution Plane evidence.
 
 ## Repository policy
 
-Develop on feature branches, verify in CI, merge through PRs, and keep hardware transport behind an explicit authority boundary.
+Develop on feature branches, verify in CI, merge through PRs, and keep Workbench read/analysis-focused. Do not add new production execution authority here when an owning Control or Execution Plane already exists.

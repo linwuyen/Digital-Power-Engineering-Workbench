@@ -15,7 +15,7 @@ BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
 
 
 class FinalWorkbenchIntegrationTests(unittest.TestCase):
-    def test_browser_loader_reaches_truth_layer(self):
+    def test_browser_loader_reaches_snapshot_layer(self):
         i18n = (ROOT / "static" / "i18n.js").read_text(encoding="utf-8")
         loader = (ROOT / "static" / "eng" / "loader.js").read_text(encoding="utf-8")
         source = (ROOT / "static" / "eng" / "data_source.js").read_text(encoding="utf-8")
@@ -23,9 +23,12 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         self.assertIn("./eng/data_source.js", loader)
         self.assertIn("../engineering_data/", source)
         self.assertIn("FAIL CLOSED", source)
-        self.assertIn("PRODUCTION VOCABULARY · PARTIAL TRANSITIONS", source)
+        self.assertIn("DERIVED SNAPSHOT", source)
+        self.assertIn("SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS", source)
+        self.assertIn("federation/source_manifest.json", source)
+        self.assertIn("authoritative_engineering_truth", source)
 
-    def test_truth_baselines_are_identical(self):
+    def test_snapshot_baselines_are_identical(self):
         paths = [
             ROOT / "engineering_data" / "index.json",
             ROOT / "engineering_data" / "firmware" / "state_machine.json",
@@ -37,7 +40,17 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
             values.append(data["baseline"]["commit"] if path.name == "index.json" else data["baseline"])
         self.assertEqual(values, [BASELINE, BASELINE, BASELINE])
 
-    def test_local_server_exposes_truth_data_and_blocks_traversal(self):
+    def test_federation_marks_workbench_view_only(self):
+        manifest = json.loads((ROOT / "engineering_data" / "federation" / "source_manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["workbench_role"], "view_analysis_plane")
+        self.assertFalse(manifest["authoritative_engineering_truth"])
+        self.assertEqual(manifest["sources"]["control_plane"]["repository"], "linwuyen/ASR5K_AGENT")
+        self.assertEqual(manifest["sources"]["execution_plane"]["repository"], "linwuyen/ASR5K_v2_28384")
+        self.assertEqual(manifest["snapshot_policy"]["engineering_data_role"], "derived_snapshot_cache")
+        self.assertFalse(manifest["snapshot_policy"]["may_override_control_plane"])
+        self.assertFalse(manifest["snapshot_policy"]["may_override_execution_plane"])
+
+    def test_local_server_exposes_snapshot_data_and_blocks_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -48,6 +61,7 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
                 self.assertTrue(response.headers["Content-Type"].startswith("application/json"))
                 payload = json.loads(response.read().decode("utf-8"))
                 self.assertEqual(payload["baseline"]["commit"], BASELINE)
+                self.assertFalse(payload["authoritative_engineering_truth"])
 
             with self.assertRaises(HTTPError) as ctx:
                 urlopen(f"http://{host}:{port}/engineering_data/%2e%2e/server.py", timeout=3)
@@ -57,7 +71,7 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
             server.server_close()
             thread.join(timeout=3)
 
-    def test_pending_hardware_truth_remains_unqualified(self):
+    def test_pending_hardware_snapshot_remains_unqualified(self):
         matrix = json.loads((ROOT / "engineering_data" / "verification" / "verification_matrix.json").read_text(encoding="utf-8"))
         status = {row["item"]: row["status"] for row in matrix["scope"]}
         self.assertEqual(status["ADC measurement scaling/calibration"], "PENDING")

@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0",
+  "dataset": "ASR5K federated source ownership manifest",
+  "workbench_role": "view_analysis_plane",
+  "authoritative_engineering_truth": false,
+  "sources": {
+    "control_plane": {
+      "repository": "linwuyen/ASR5K_AGENT",
+      "authority": [
+        "product_intent",
+        "architecture_contracts",
+        "decisions",
+        "durable_current_status",
+        "source_of_truth_routing",
+        "evidence_interpretation_rules",
+        "reference_knowledge"
+      ],
+      "canonical_router": "AGENTS.md",
+      "current_status": "MEMORY/CURRENT_STATUS.md",
+      "three_repo_contract": "01_Architecture/ACTIVE/THREE_REPO_RESPONSIBILITY_CONTRACT.md"
+    },
+    "execution_plane": {
+      "repository": "linwuyen/ASR5K_v2_28384",
+      "authority": [
+        "exact_implementation_truth",
+        "build_and_link_inputs",
+        "repository_tests",
+        "headless_build_execution",
+        "flash_execution",
+        "physical_hil_execution",
+        "qualification_execution",
+        "artifact_identity",
+        "machine_readable_execution_evidence"
+      ],
+      "canonical_router": "AGENTS.md"
+    },
+    "view_plane": {
+      "repository": "linwuyen/Digital-Power-Engineering-Workbench",
+      "authority": [
+        "presentation",
+        "visualization",
+        "reference_calculators",
+        "derived_analysis",
+        "read_only_evidence_views",
+        "derived_snapshots"
+      ]
+    }
+  },
+  "snapshot_policy": {
+    "engineering_data_role": "derived_snapshot_cache",
+    "currentness": "historical_pinned_snapshot_unless_explicitly_refreshed",
+    "may_override_control_plane": false,
+    "may_override_execution_plane": false,
+    "exact_sha_evidence_transfers_to_descendants": false,
+    "unknown_or_unresolved_source_action": "fail_closed"
+  },
+  "current_workbench_snapshot": {
+    "repository": "linwuyen/ASR5K_v2_28384",
+    "branch": "feat/voltage-slew-runtime-complete",
+    "commit": "2b72f50648d86c11547645882248eed69f12892f",
+    "freshness": "historical_snapshot",
+    "current_live_firmware_must_be_requeried": true
+  },
+  "derived_view_rule": "Workbench release/status/qualification views must name their Agent and firmware/evidence inputs and remain derived. A Workbench result is never stronger than its source identities."
+}
