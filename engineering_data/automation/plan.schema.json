@@ -6,17 +6,16 @@
   "properties": {
     "id": {"type": "string", "minLength": 1},
     "baseline": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
-    "mode": {"enum": ["simulation", "hardware"]},
+    "mode": {"enum": ["simulation", "build", "hardware"]},
     "requirements": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-    "preflight": {
-      "type": "object",
-      "properties": {
-        "production_repo_required": {"type": "boolean"},
-        "require_clean_production_repo": {"type": "boolean"}
-      }
-    },
+    "preflight": {"type": "object", "properties": {"production_repo_required": {"type": "boolean"}, "require_clean_production_repo": {"type": "boolean"}}},
     "steps": {"type": "array", "minItems": 1},
     "artifacts": {"type": "array"},
     "evidence_claims": {"type": "array", "minItems": 1}
+  },
+  "x-mode-policy": {
+    "simulation": "Never qualifies production.",
+    "build": "May qualify exact-head build requirements only; no HIL, physical collector, flash or hardware command steps.",
+    "hardware": "Requires explicit local allow_hardware=true and retains DUT-local safety authority."
   }
 }
