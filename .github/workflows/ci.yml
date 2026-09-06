@@ -11,6 +11,7 @@ on:
       - feat/engineering-memory-ssot
       - feat/engineering-os-automation
       - feat/full-auto-evidence-pipeline
+      - feat/auto-bind-real-hardware
   pull_request:
     branches:
       - main
@@ -72,7 +73,7 @@ jobs:
 
       - name: Full-auto end-to-end smoke remains non-qualifying in simulation
         run: |
-          python tools/auto_run.py --config config/auto_run.ci.json run AUTO-REFERENCE-MOCK-001 > /tmp/auto-run.txt
+          python tools/auto_run_ext.py --config config/auto_run.ci.json run AUTO-REFERENCE-MOCK-001 > /tmp/auto-run.txt
           cat /tmp/auto-run.txt
           python - <<'PY'
           import json
@@ -84,6 +85,22 @@ jobs:
           archive = Path(latest['archive_path'])
           assert (archive / 'manifest.json').exists()
           assert (archive / 'summary.json').exists()
+          PY
+
+      - name: Build plans are non-physical and exact-baseline bound
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'tools')
+          import auto_run_ext
+          baseline = '2b72f50648d86c11547645882248eed69f12892f'
+          for name in ['cpu1_build.json','cpu2_build.json','m0_build.json','triple_build.json']:
+              plan = json.loads((Path('engineering_data/automation/plans') / name).read_text())
+              assert plan['mode'] == 'build'
+              assert plan['baseline'] == baseline
+              auto_run_ext.validate_plan(plan)
+          print('validated exact-baseline build plans')
           PY
 
       - name: Reject drift from pinned exact-source snapshot

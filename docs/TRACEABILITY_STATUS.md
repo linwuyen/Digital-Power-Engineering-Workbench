@@ -15,5 +15,8 @@ Baseline: `2b72f50648d86c11547645882248eed69f12892f`
 | REQ-TIMING-001 | BLOCKED_PENDING_EVIDENCE | CPU1 SPIB timing | — |
 | REQ-PROT-001 | BLOCKED_PENDING_EVIDENCE | Protection architecture | — |
 | REQ-QUAL-001 | NOT_CLAIMED | Verification | — |
+| REQ-BUILD-CPU1-001 | NOT_CLAIMED | CPU1 build | — |
+| REQ-BUILD-CPU2-001 | NOT_CLAIMED | CPU2 build | — |
+| REQ-BUILD-M0-001 | NOT_CLAIMED | M0 build | — |
 
 Generated from canonical requirement/evidence data. Do not edit qualification status by hand.
