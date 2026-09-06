@@ -3,16 +3,15 @@ param(
     [string[]]$CommandArgs
 )
 
-$Python = if (Get-Command py -ErrorAction SilentlyContinue) { "py" } else { "python" }
-
-if ($CommandArgs.Count -gt 0 -and $CommandArgs[0] -eq "bind") {
-    $Rest = @()
-    if ($CommandArgs.Count -gt 1) {
-        $Rest = $CommandArgs[1..($CommandArgs.Count - 1)]
-    }
-    & $Python "$PSScriptRoot\tools\hardware_bind.py" @Rest
-    exit $LASTEXITCODE
-}
-
-& $Python "$PSScriptRoot\tools\auto_run_ext.py" @CommandArgs
-exit $LASTEXITCODE
+Write-Host "ASR5K Workbench execution entrypoint is deprecated." -ForegroundColor Yellow
+Write-Host "Workbench is now the View / Analysis Plane." -ForegroundColor Yellow
+Write-Host "Production build / flash / HIL / qualification execution belongs to:" -ForegroundColor Yellow
+Write-Host "  linwuyen/ASR5K_v2_28384" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Use the firmware repository's supported tools, for example:" -ForegroundColor White
+Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_cpu1_headless.ps1"
+Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File tools/qualify_cpu1_exact_head.ps1 -ExpectedSha <SHA> -Configuration FLASH"
+Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_m0_headless.ps1"
+Write-Host ""
+Write-Host "See engineering_data/federation/deprecation_registry.json and docs/THREE_REPO_CONVERGENCE.md."
+exit 2
