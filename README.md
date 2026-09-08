@@ -1,3 +1,5 @@
+https://linwuyen.github.io/Digital-Power-Engineering-Workbench/
+
 # Digital Power Engineering Workbench
 
 Browser-first engineering workbench for digital-power development. The project is intentionally organized around the same signal/authority path used in a real programmable power supply:
