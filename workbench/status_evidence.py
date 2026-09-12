@@ -13,6 +13,7 @@ RESULT_MAP = {
     "INCONCLUSIVE": "PENDING",
     "MEASURED": "PENDING",
 }
+STRONG_STATES = {"PASS", "FAIL", "GOLDEN"}
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -46,7 +47,7 @@ def _record_gate(
     row: dict,
     sha_field: str,
     execution_sha: str,
-    evidence_id: str,
+    evidence_id: str | None,
     evidence_type: str,
 ) -> dict | None:
     gate = str(row.get("gate", "")).lower()
@@ -58,15 +59,51 @@ def _record_gate(
     if result not in RESULT_MAP:
         return None
     status = RESULT_MAP[result]
+    evidence = str(evidence_id).strip() if evidence_id else None
+    if status in {"PASS", "FAIL"} and not evidence:
+        return None
     return make_gate(
         gate,
         status,
         sha=execution_sha,
-        evidence=evidence_id or None,
+        evidence=evidence,
         evidence_type=evidence_type,
         timestamp=row.get("timestamp_utc") or row.get("timestamp"),
         note=None if status in {"PASS", "FAIL"} else f"source result: {result}",
     )
+
+
+def _candidate_key(row: dict) -> tuple[str, str, str, str]:
+    return (
+        str(row.get("status") or ""),
+        str(row.get("evidence_type") or ""),
+        str(row.get("evidence") or ""),
+        str(row.get("timestamp") or ""),
+    )
+
+
+def _resolve_gate(gate: str, candidates: list[dict]) -> dict:
+    if not candidates:
+        return make_gate(gate, "UNKNOWN")
+    ordered = sorted(candidates, key=_candidate_key)
+    strong = [row for row in ordered if row.get("status") in STRONG_STATES]
+    strong_states = {row["status"] for row in strong}
+    if "FAIL" in strong_states and ("PASS" in strong_states or "GOLDEN" in strong_states):
+        return make_gate(
+            gate,
+            "UNKNOWN",
+            note="conflicting evidence: " + ", ".join(sorted(strong_states)),
+        )
+    if "GOLDEN" in strong_states:
+        return next(row for row in strong if row["status"] == "GOLDEN")
+    if "FAIL" in strong_states:
+        return next(row for row in strong if row["status"] == "FAIL")
+    if "PASS" in strong_states:
+        return next(row for row in strong if row["status"] == "PASS")
+    pending = [row for row in ordered if row.get("status") == "PENDING"]
+    if pending:
+        return pending[0]
+    return make_gate(gate, "UNKNOWN")
 
 
 def evidence_details_for_sha(data_root: Path, execution_sha: str) -> list[dict]:
@@ -96,7 +133,7 @@ def qualification_for_sha(
     golden: dict,
 ) -> list[dict]:
     root = Path(data_root)
-    by_gate = {gate: make_gate(gate, "UNKNOWN") for gate in GATES}
+    candidates: dict[str, list[dict]] = {gate: [] for gate in GATES}
 
     for row in read_jsonl(root / "evidence" / "evidence_ledger.jsonl"):
         if row.get("record_type") != "evidence":
@@ -105,51 +142,53 @@ def qualification_for_sha(
             row,
             "baseline",
             execution_sha,
-            str(row.get("evidence_id", "")),
+            row.get("evidence_id"),
             "evidence_ledger",
         )
         if normalized:
-            by_gate[normalized["gate"]] = normalized
+            candidates[normalized["gate"]].append(normalized)
 
     regression = _json(root / "verification" / "regression_history" / "index.json")
-    for index, row in enumerate(regression.get("records", [])):
+    for row in regression.get("records", []):
         if not isinstance(row, dict):
             continue
         normalized = _record_gate(
             row,
             "commit",
             execution_sha,
-            str(row.get("evidence_id") or row.get("artifact_or_log") or f"regression:{index}"),
+            row.get("evidence_id") or row.get("artifact_or_log"),
             "regression_history",
         )
         if normalized:
-            by_gate[normalized["gate"]] = normalized
+            candidates[normalized["gate"]].append(normalized)
 
     hardware = _json(root / "verification" / "hardware_results" / "index.json")
-    for index, row in enumerate(hardware.get("records", [])):
+    for row in hardware.get("records", []):
         if not isinstance(row, dict):
             continue
         normalized = _record_gate(
             row,
             "dut_commit",
             execution_sha,
-            str(row.get("evidence_id") or row.get("evidence") or f"hardware:{index}"),
+            row.get("evidence_id") or row.get("evidence"),
             "hardware_results",
         )
         if normalized:
-            by_gate[normalized["gate"]] = normalized
+            candidates[normalized["gate"]].append(normalized)
 
     if golden.get("golden_sha") == execution_sha:
         source = str(golden.get("source") or "CURRENT_PRODUCT_BASELINE.md")
         release_ref = golden.get("release_ref")
         evidence = f"{source}: {release_ref}" if release_ref else source
-        by_gate["production"] = make_gate(
-            "production",
-            "GOLDEN",
-            sha=execution_sha,
-            evidence=evidence,
-            evidence_type="product_baseline",
-            note="explicit owner-selected product baseline",
+        candidates["production"].append(
+            make_gate(
+                "production",
+                "GOLDEN",
+                sha=execution_sha,
+                evidence=evidence,
+                evidence_type="product_baseline",
+                note="explicit owner-selected product baseline",
+            )
         )
 
-    return [by_gate[gate] for gate in GATES]
+    return [_resolve_gate(gate, candidates[gate]) for gate in GATES]
