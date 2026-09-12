@@ -15,12 +15,19 @@ from workbench.protocol import ProtocolError, Frame, bytes_to_hex, decode_frame,
 from workbench.remote import RemoteCommandError, SafeMockPowerSupply
 from workbench.sfra import SfraError, compare_theory_to_sfra, parse_sfra_csv
 from workbench.state_machine import get_state_machine
+from workbench.status_service import build_live_evidence, build_live_status
 from workbench.validation import ValidationError, run_sequence
 
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 ENGINEERING_DATA = ROOT / "engineering_data"
 REMOTE = SafeMockPowerSupply()
+
+
+def _status_roots() -> tuple[Path, Path]:
+    agent = Path(os.environ.get("ASR5K_AGENT_ROOT", ROOT.parent / "ASR5K_AGENT")).expanduser().resolve()
+    firmware = Path(os.environ.get("ASR5K_FIRMWARE_ROOT", ROOT.parent / "ASR5K_v2_28384")).expanduser().resolve()
+    return agent, firmware
 
 
 class WorkbenchHandler(SimpleHTTPRequestHandler):
@@ -82,13 +89,20 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self._serve_engineering_data():
             return
-        if self.path == "/api/health":
+        route = urlsplit(self.path).path
+        if route == "/api/status/summary":
+            agent, firmware = _status_roots()
+            return self._json(200, build_live_status(agent, firmware, ENGINEERING_DATA))
+        if route == "/api/status/evidence":
+            agent, firmware = _status_roots()
+            return self._json(200, build_live_evidence(agent, firmware, ENGINEERING_DATA))
+        if route == "/api/health":
             return self._json(200, {"ok": True, "service": "digital-power-engineering-workbench", "version": "1.0-engineering"})
-        if self.path == "/api/state-machine":
+        if route == "/api/state-machine":
             return self._json(200, get_state_machine())
-        if self.path == "/api/profiles":
+        if route == "/api/profiles":
             return self._json(200, {"profiles": builtin_profiles()})
-        if self.path == "/api/remote/telemetry":
+        if route == "/api/remote/telemetry":
             return self._json(200, REMOTE.telemetry())
         return super().do_GET()
 
