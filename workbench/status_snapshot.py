@@ -4,11 +4,38 @@ from copy import deepcopy
 from datetime import datetime
 import json
 from pathlib import Path
+import re
 
 from .status_model import classify_freshness, derive_blockers, validate_status_model
 
 
 FORBIDDEN_KEYS = {"path", "local_path", "workspace", "secret", "token"}
+_WINDOWS_ABSOLUTE = re.compile(r"^[A-Za-z]:[\\/]")
+
+
+def _forbidden_key(key: object) -> bool:
+    lowered = str(key).lower()
+    return lowered in FORBIDDEN_KEYS or any(
+        fragment in lowered for fragment in ("password", "secret", "token", "workspace")
+    )
+
+
+def _redact_string(value: str) -> str:
+    parts = re.split(r"(\s+)", value)
+    for index, part in enumerate(parts):
+        if not part or part.isspace():
+            continue
+        token = part.strip("()[]{}<>,;\"'")
+        if (
+            token.startswith("/")
+            or token.startswith("~/")
+            or token.startswith("\\\\")
+            or _WINDOWS_ABSOLUTE.match(token)
+        ):
+            prefix_len = part.find(token)
+            suffix_start = prefix_len + len(token)
+            parts[index] = part[:prefix_len] + "[REDACTED_LOCAL_PATH]" + part[suffix_start:]
+    return "".join(parts)
 
 
 def _strip(value):
@@ -16,10 +43,12 @@ def _strip(value):
         return {
             key: _strip(item)
             for key, item in value.items()
-            if str(key).lower() not in FORBIDDEN_KEYS
+            if not _forbidden_key(key)
         }
     if isinstance(value, list):
         return [_strip(item) for item in value]
+    if isinstance(value, str):
+        return _redact_string(value)
     return value
 
 
