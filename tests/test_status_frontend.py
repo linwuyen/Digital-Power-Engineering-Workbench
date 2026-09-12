@@ -24,6 +24,13 @@ class StatusFrontendTests(unittest.TestCase):
         primary = html.split('id="engineering-tools"', 1)[0]
         self.assertNotIn('data-panel="remote"', primary)
 
+    def test_dynamic_engineering_panels_are_inserted_before_demo_group(self):
+        html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+        common = (ROOT / "static" / "eng" / "common.js").read_text(encoding="utf-8")
+        self.assertIn('id="demo-reference-nav"', html)
+        self.assertIn("demo-reference-nav", common)
+        self.assertIn("insertBefore(b,anchor)", common.replace(" ", ""))
+
 
 if __name__ == "__main__":
     unittest.main()
