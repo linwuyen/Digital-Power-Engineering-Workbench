@@ -74,10 +74,11 @@ Snapshot generation creates a derived read-only view only; it does not create or
 The Workbench still contains the reproducible historical dataset:
 
 ```text
-repository: linwuyen/ASR5K_v2_28384
-branch:     feat/voltage-slew-runtime-complete
-commit:     2b72f50648d86c11547645882248eed69f12892f
-classification: historical_snapshot
+repository:     linwuyen/ASR5K_v2_28384
+branch:         feat/voltage-slew-runtime-complete
+commit:         2b72f50648d86c11547645882248eed69f12892f
+classification: DERIVED_SNAPSHOT
+freshness:      historical_snapshot
 ```
 
 This remains useful for historical source-derived views, but it is not the live firmware baseline and cannot override owner repositories.
