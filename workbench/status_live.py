@@ -62,14 +62,12 @@ def parse_product_baseline(text: str) -> dict:
 def read_product_baseline(firmware_root: Path) -> dict:
     root = Path(firmware_root).expanduser().resolve()
     identity = repo_identity(root)
-    path = (root / "CURRENT_PRODUCT_BASELINE.md").resolve()
-    try:
-        path.relative_to(root)
-    except ValueError as exc:
-        raise ValueError("product baseline path escaped firmware root") from exc
-    if not path.is_file():
-        raise FileNotFoundError(f"missing product baseline: {path}")
-    parsed = parse_product_baseline(path.read_text(encoding="utf-8"))
+    committed_text = _git_output(
+        root,
+        "show",
+        f"{identity['sha']}:CURRENT_PRODUCT_BASELINE.md",
+    )
+    parsed = parse_product_baseline(committed_text)
     parsed["firmware_repository_sha"] = identity["sha"]
     return parsed
 
