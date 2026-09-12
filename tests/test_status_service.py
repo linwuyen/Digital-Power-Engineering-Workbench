@@ -87,7 +87,9 @@ class StatusServiceTests(unittest.TestCase):
             write_empty_data(data)
             model = build_live_status(agent, base / "missing-firmware", data)
             self.assertEqual(model["identity"]["relation_to_golden"], "UNKNOWN")
+            self.assertIsNone(model["identity"]["evidence_sha_match"])
             self.assertTrue(all(x["status"] == "UNKNOWN" for x in model["qualification"]))
+            self.assertFalse(any(x["category"] == "IDENTITY_MISMATCH" for x in model["blockers"]))
 
     def test_dirty_firmware_is_reported_but_not_auto_failed(self):
         with tempfile.TemporaryDirectory() as tmp:
