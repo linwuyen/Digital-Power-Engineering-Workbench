@@ -37,7 +37,7 @@
   "health": "DEGRADED",
   "identity": {
     "control_plane_revision_known": false,
-    "evidence_sha_match": false,
+    "evidence_sha_match": null,
     "relation_to_golden": "UNKNOWN"
   },
   "mode": "SNAPSHOT",
