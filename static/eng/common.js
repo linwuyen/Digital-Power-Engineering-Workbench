@@ -12,7 +12,8 @@
   D.addPanel = (id,zh,en,html) => {
     const sidebar=D.q('.sidebar'), boundary=D.q('.boundary',sidebar), content=D.q('.content');
     if(!sidebar||!content||D.$(id)) return null;
-    const anchor=D.$('demo-reference-nav')||boundary;
+    const demoGroup=D.qa('.nav-group-label',sidebar).find(el=>el.textContent.trim()==='DEMO / REFERENCE');
+    const anchor=demoGroup||boundary;
     const b=document.createElement('button'); b.className='nav'; b.dataset.panel=id; D.setBi(b,zh,en); sidebar.insertBefore(b,anchor);
     content.insertAdjacentHTML('beforeend',html); const panel=D.$(id);
     b.addEventListener('click',()=>{D.qa('.nav').forEach(x=>x.classList.remove('active'));D.qa('.panel').forEach(x=>x.classList.remove('active'));b.classList.add('active');panel.classList.add('active');panel.dispatchEvent(new CustomEvent('dpwe:show'));});
