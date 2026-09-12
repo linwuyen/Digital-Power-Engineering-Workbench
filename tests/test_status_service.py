@@ -124,6 +124,40 @@ class StatusServiceTests(unittest.TestCase):
             self.assertEqual(build["status"], "UNKNOWN")
             self.assertIn("evidence source malformed or unreadable", build["note"])
 
+    def test_conflicting_evidence_degrades_health_and_surfaces_unknown_blocker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            agent = base / "agent"; agent.mkdir()
+            firmware = base / "firmware"; firmware.mkdir()
+            data = base / "data"
+            init_repo(agent)
+            firmware_sha = init_repo(firmware, baseline=True)
+            write_empty_data(data)
+            (data / "evidence" / "evidence_ledger.jsonl").write_text(
+                json.dumps({
+                    "record_type": "evidence",
+                    "evidence_id": "BUILD-PASS",
+                    "baseline": firmware_sha,
+                    "gate": "build",
+                    "result": "PASS",
+                }) + "\n",
+                encoding="utf-8",
+            )
+            (data / "verification" / "regression_history" / "index.json").write_text(
+                json.dumps({"records": [{
+                    "commit": firmware_sha,
+                    "gate": "build",
+                    "result": "FAIL",
+                    "artifact_or_log": "build-fail.log",
+                }]}) + "\n",
+                encoding="utf-8",
+            )
+            model = build_live_status(agent, firmware, data)
+            build = next(x for x in model["qualification"] if x["gate"] == "build")
+            self.assertEqual(model["health"], "DEGRADED")
+            self.assertEqual(build["status"], "UNKNOWN")
+            self.assertTrue(any(x["source"] == "build" and x["category"] == "UNKNOWN_EVIDENCE" for x in model["blockers"]))
+
 
 if __name__ == "__main__":
     unittest.main()
