@@ -12,6 +12,7 @@ from .status_model import GATES, derive_blockers, make_gate, validate_status_mod
 CONTROL_REPO = "linwuyen/ASR5K_AGENT"
 EXECUTION_REPO = "linwuyen/ASR5K_v2_28384"
 EVIDENCE_UNAVAILABLE_NOTE = "evidence source malformed or unreadable"
+CONFLICT_NOTE_PREFIX = "conflicting evidence"
 
 
 def _unknown_repo(repository: str) -> dict:
@@ -30,6 +31,13 @@ def _read_identity(repository: str, root: Path) -> dict:
 
 def _unknown_evidence_qualification(note: str) -> list[dict]:
     return [make_gate(gate, "UNKNOWN", note=note) for gate in GATES]
+
+
+def _has_evidence_conflict(qualification: list[dict]) -> bool:
+    return any(
+        str(row.get("note") or "").startswith(CONFLICT_NOTE_PREFIX)
+        for row in qualification
+    )
 
 
 def build_live_status(
@@ -83,6 +91,8 @@ def build_live_status(
         except (OSError, ValueError):
             health = "DEGRADED"
             qualification = _unknown_evidence_qualification(EVIDENCE_UNAVAILABLE_NOTE)
+        if _has_evidence_conflict(qualification):
+            health = "DEGRADED"
         by_gate = {row["gate"]: row for row in qualification}
         by_gate["source"] = make_gate(
             "source",
