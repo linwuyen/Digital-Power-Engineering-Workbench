@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Digital Power Engineering Workbench：量測訊號鏈、數位控制、韌體狀態機與安全 Mock 電源遠端控制。" />
-  <title>Digital Power Engineering Workbench</title>
+  <meta name="description" content="ASR5K Engineering Console：exact-SHA 韌體身分、qualification evidence、blockers、freshness 與數位電源工程工具。" />
+  <title>ASR5K Engineering Console</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div><div class="eyebrow">DIGITAL POWER ENGINEERING</div><h1>Workbench</h1></div>
+    <div><div class="eyebrow">ASR5K ENGINEERING</div><h1>Engineering Console</h1></div>
     <div class="top-status">
       <button id="langToggle" class="secondary" type="button">English</button>
       <span id="runtimeMode" class="badge">detecting runtime</span>
@@ -18,14 +18,50 @@
   </header>
   <main class="shell">
     <aside class="sidebar">
-      <button class="nav active" data-panel="measurement" data-i18n="nav.measurement">量測訊號鏈</button>
+      <div class="nav-group-label" id="asr5k-status-nav">ASR5K STATUS</div>
+      <button class="nav active" data-panel="status" data-eng-zh="總覽" data-eng-en="Overview">總覽</button>
+      <button class="nav" data-panel="qualification-status" data-eng-zh="資格驗證" data-eng-en="Qualification">資格驗證</button>
+      <button class="nav" data-panel="evidence-status" data-eng-zh="證據" data-eng-en="Evidence">證據</button>
+      <button class="nav" data-panel="changes-status" data-eng-zh="版本關係" data-eng-en="Changes">版本關係</button>
+      <div class="nav-group-label" id="engineering-tools">ENGINEERING TOOLS</div>
+      <button class="nav" data-panel="measurement" data-i18n="nav.measurement">量測訊號鏈</button>
       <button class="nav" data-panel="control" data-i18n="nav.control">數位控制視覺化</button>
       <button class="nav" data-panel="state" data-i18n="nav.state">韌體狀態機</button>
+      <div class="nav-group-label">DEMO / REFERENCE</div>
       <button class="nav" data-panel="remote" data-i18n="nav.remote">電源遠端控制</button>
       <div class="boundary"><strong data-i18n="safety.title">安全邊界</strong><p data-i18n="safety.body">瀏覽器／網路命令只代表操作意圖。保護與 Trip 權限必須留在韌體／硬體本地端。</p></div>
     </aside>
     <section class="content">
-      <section id="measurement" class="panel active">
+      <section id="status" class="panel active">
+        <div class="panel-head"><div><div class="eyebrow">IDENTITY → EVIDENCE → TRUST</div><h2 data-eng-zh="ASR5K 工程狀態" data-eng-en="ASR5K Engineering Status">ASR5K 工程狀態</h2></div><span id="statusMode" class="badge">LOADING</span></div>
+        <div class="status-hero card"><div><span>Question</span><strong data-eng-zh="現在 ASR5K 到底能不能相信？" data-eng-en="Can the current ASR5K state be trusted?">現在 ASR5K 到底能不能相信？</strong></div><p>Exact identity first. Missing evidence stays UNKNOWN.</p></div>
+        <h3 class="section-heading">PRODUCT BASELINE</h3><div id="statusBaseline" class="status-grid card"></div>
+        <h3 class="section-heading">QUALIFICATION</h3><div id="statusQualification" class="gate-grid"></div>
+        <div class="status-columns">
+          <div><h3 class="section-heading">CURRENT ENGINEERING STATE</h3><div id="statusEngineering" class="status-grid card"></div></div>
+          <div><h3 class="section-heading">DATA HEALTH</h3><div id="statusHealth" class="status-grid card"></div></div>
+        </div>
+        <h3 class="section-heading">SOURCE IDENTITY</h3><div id="statusSources" class="card source-list"></div>
+        <h3 class="section-heading">BLOCKERS / UNKNOWN</h3><div id="statusBlockers" class="blocker-list"></div>
+      </section>
+
+      <section id="qualification-status" class="panel">
+        <div class="panel-head"><div><div class="eyebrow">BUILD ≠ FLASH ≠ BOARD ≠ PRODUCTION</div><h2>Qualification Matrix</h2></div><span class="badge">EXACT SHA ONLY</span></div>
+        <div id="qualificationMatrix" class="gate-grid"></div>
+        <h3 class="section-heading">BLOCKERS</h3><div id="qualificationBlockers" class="blocker-list"></div>
+      </section>
+
+      <section id="evidence-status" class="panel">
+        <div class="panel-head"><div><div class="eyebrow">CLAIM → SHA → EVIDENCE</div><h2>Evidence</h2></div><span class="badge">READ ONLY</span></div>
+        <div class="card"><div id="evidenceRows" class="evidence-list"></div></div>
+      </section>
+
+      <section id="changes-status" class="panel">
+        <div class="panel-head"><div><div class="eyebrow">CURRENT ↔ GOLDEN</div><h2>Changes / Identity Relation</h2></div><span class="badge">NO INFERRED QUALIFICATION</span></div>
+        <div id="changesIdentity" class="status-grid card"></div>
+      </section>
+
+      <section id="measurement" class="panel">
         <div class="panel-head"><div><div class="eyebrow">MEASURE → CONDITION → CONVERT</div><h2 data-i18n="measurement.title">Datasheet／訊號鏈計算器</h2></div><span class="badge">STATIC + PYTHON PARITY</span></div>
         <div class="grid two">
           <form id="measurementForm" class="card form-grid">
@@ -58,7 +94,8 @@
         <div class="grid two state-lower"><div class="card"><h3 data-i18n="state.selected">選取狀態</h3><div id="stateDetail" class="detail">Select a state.</div></div><div class="card"><div class="telemetry-top"><h3 data-i18n="state.simulator">轉移模擬器</h3><span id="simState" class="badge">—</span></div><p class="note" data-i18n="state.note">此模擬器只呈現 policy flow，不是 production state machine 實作。</p><div id="transitionList" class="transition-list"></div><div id="transitionHistory" class="history"></div></div></div>
       </section>
       <section id="remote" class="panel">
-        <div class="panel-head"><div><div class="eyebrow">OPERATOR INTENT → VALIDATION → MOCK TRANSPORT</div><h2 data-i18n="remote.title">電源供應器遠端控制</h2></div><span class="badge danger" data-i18n="remote.mockOnly">僅限 MOCK</span></div>
+        <div class="panel-head"><div><div class="eyebrow">DEMO ONLY · OPERATOR INTENT → MOCK TRANSPORT</div><h2 data-i18n="remote.title">電源供應器遠端控制</h2></div><span class="badge danger" data-i18n="remote.mockOnly">僅限 MOCK</span></div>
+        <div class="truth-boundary truth-pending"><strong>DEMO / REFERENCE</strong><span>此頁不是 ASR5K production control surface，不具有 safety authority。</span></div>
         <div class="grid two"><div class="card"><h3 data-i18n="remote.setpoints">設定值</h3><div class="form-grid"><label><span data-i18n="remote.voltage">電壓 (V)</span><input id="rVoltage" type="number" step="any" value="100" /></label><label><span data-i18n="remote.current">電流限制 (A)</span><input id="rCurrent" type="number" step="any" value="5" /></label><button id="setVoltage" class="secondary" data-i18n="remote.applyVoltage">套用電壓</button><button id="setCurrent" class="secondary" data-i18n="remote.applyCurrent">套用電流</button></div><div class="button-row"><button id="outputOn" class="primary">OUTPUT ON</button><button id="outputOff" class="danger-btn">OUTPUT OFF</button></div><h3 class="section-title" data-i18n="remote.safetySim">安全路徑模擬</h3><div class="button-row"><button id="injectOcp" class="secondary" data-i18n="remote.injectOcp">注入 OCP</button><button id="clearFault" class="secondary" data-i18n="remote.clearFault">清除 Fault</button></div><label class="toggle-row"><input id="interlockOk" type="checkbox" checked /><span data-i18n="remote.interlock">Interlock 閉合／OK</span></label><p class="note" data-i18n="remote.note">裝置模型會在 Fault latch 或 Interlock 開路時阻擋 OUTPUT_ON。真實 OVP/OCP/OTP、PWM Trip 與 Interlock 必須在韌體／硬體端保持本地且具決定性的保護權限。</p></div><div class="card telemetry"><div class="telemetry-top"><h3 data-i18n="remote.telemetry">遙測</h3><span id="rState" class="badge">—</span></div><div class="big-number"><span>VOUT</span><strong id="rVout">0.000 V</strong></div><div class="big-number"><span>IOUT</span><strong id="rIout">0.000 A</strong></div><div class="metrics horizontal"><div><span data-i18n="remote.power">功率</span><strong id="rPower">0 W</strong></div><div><span data-i18n="remote.mode">模式</span><strong id="rMode">—</strong></div><div><span>Fault</span><strong id="rFault">—</strong></div><div><span>Transport</span><strong id="rTransport">—</strong></div></div><div class="command-log"><h3 data-i18n="remote.log">命令紀錄</h3><div id="commandLog"></div></div></div></div>
       </section>
     </section>
