@@ -31,6 +31,16 @@ class EngineeringDataIntegrityTest(unittest.TestCase):
             with self.subTest(resource=name):
                 self.assertTrue((DATA / relative).is_file(), relative)
 
+    def test_public_status_snapshot_is_derived_and_sanitized(self):
+        index = load_json("index.json")
+        self.assertEqual(index["resources"]["status_snapshot"], "status/status_snapshot.json")
+        snapshot = load_json("status/status_snapshot.json")
+        self.assertFalse(snapshot["authoritative_engineering_truth"])
+        self.assertEqual(snapshot["mode"], "SNAPSHOT")
+        self.assertNotIn("path", snapshot["control_plane"])
+        self.assertNotIn("path", snapshot["execution_plane"])
+        self.assertIsNone(snapshot["execution_plane"]["dirty"])
+
     def test_manifest_is_identity_not_qualification_claim(self):
         manifest = load_json("baselines/manifest-2b72f506.json")
         self.assertEqual(manifest["commit"], BASELINE)
