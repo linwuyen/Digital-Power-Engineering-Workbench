@@ -28,16 +28,37 @@ class StatusEvidenceTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def write_regression(self, root: Path, rows: list[dict]) -> None:
+        (root / "verification" / "regression_history" / "index.json").write_text(
+            json.dumps({"records": rows}) + "\n",
+            encoding="utf-8",
+        )
+
+    def write_hardware(self, root: Path, rows: list[dict]) -> None:
+        (root / "verification" / "hardware_results" / "index.json").write_text(
+            json.dumps({"records": rows}) + "\n",
+            encoding="utf-8",
+        )
+
+    def gates(self, root: Path, golden_sha: str = OTHER) -> dict[str, dict]:
+        return {
+            x["gate"]: x
+            for x in qualification_for_sha(
+                root,
+                SHA,
+                {
+                    "golden_sha": golden_sha,
+                    "source": "CURRENT_PRODUCT_BASELINE.md",
+                    "release_ref": "release/final",
+                },
+            )
+        }
+
     def test_no_records_means_unknown_not_pass(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.write_dataset(root, [])
-            gates = {
-                x["gate"]: x
-                for x in qualification_for_sha(
-                    root, SHA, {"golden_sha": OTHER, "source": "baseline.md"}
-                )
-            }
+            gates = self.gates(root)
             self.assertEqual(gates["build"]["status"], "UNKNOWN")
             self.assertEqual(gates["hil"]["status"], "UNKNOWN")
 
@@ -63,12 +84,7 @@ class StatusEvidenceTests(unittest.TestCase):
                     }
                 ],
             )
-            gates = {
-                x["gate"]: x
-                for x in qualification_for_sha(
-                    root, SHA, {"golden_sha": OTHER, "source": "baseline.md"}
-                )
-            }
+            gates = self.gates(root)
             self.assertEqual(gates["build"]["status"], "PASS")
             self.assertEqual(gates["build"]["sha"], SHA)
             self.assertEqual(gates["build"]["evidence"], "EVD-1")
@@ -95,30 +111,14 @@ class StatusEvidenceTests(unittest.TestCase):
                     }
                 ],
             )
-            gates = {
-                x["gate"]: x
-                for x in qualification_for_sha(
-                    root, SHA, {"golden_sha": OTHER, "source": "baseline.md"}
-                )
-            }
+            gates = self.gates(root)
             self.assertEqual(gates["build"]["status"], "UNKNOWN")
 
     def test_matching_golden_sets_only_production_gate(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             self.write_dataset(root, [])
-            gates = {
-                x["gate"]: x
-                for x in qualification_for_sha(
-                    root,
-                    SHA,
-                    {
-                        "golden_sha": SHA,
-                        "source": "CURRENT_PRODUCT_BASELINE.md",
-                        "release_ref": "release/final",
-                    },
-                )
-            }
+            gates = self.gates(root, golden_sha=SHA)
             self.assertEqual(gates["production"]["status"], "GOLDEN")
             self.assertEqual(gates["board"]["status"], "UNKNOWN")
 
@@ -136,8 +136,61 @@ class StatusEvidenceTests(unittest.TestCase):
                     "timestamp_utc": "2026-09-12T10:00:00Z",
                 }],
             )
-            gates = {x["gate"]: x for x in qualification_for_sha(root, SHA, {"golden_sha": OTHER, "source": "baseline.md"})}
+            gates = self.gates(root)
             self.assertTrue(all(row["status"] == "UNKNOWN" for gate, row in gates.items() if gate != "production"))
+
+    def test_regression_and_hardware_pass_without_explicit_reference_stay_unknown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.write_dataset(root, [])
+            self.write_regression(root, [{"commit": SHA, "gate": "build", "result": "PASS"}])
+            self.write_hardware(root, [{"dut_commit": SHA, "gate": "hil", "result": "PASS"}])
+            gates = self.gates(root)
+            self.assertEqual(gates["build"]["status"], "UNKNOWN")
+            self.assertEqual(gates["hil"]["status"], "UNKNOWN")
+
+    def test_conflicting_pass_and_fail_for_same_gate_fail_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.write_dataset(
+                root,
+                [{
+                    "record_type": "evidence",
+                    "evidence_id": "BUILD-PASS",
+                    "baseline": SHA,
+                    "gate": "build",
+                    "result": "PASS",
+                }],
+            )
+            self.write_regression(
+                root,
+                [{
+                    "commit": SHA,
+                    "gate": "build",
+                    "result": "FAIL",
+                    "artifact_or_log": "build-fail.log",
+                }],
+            )
+            gate = self.gates(root)["build"]
+            self.assertEqual(gate["status"], "UNKNOWN")
+            self.assertIn("conflicting evidence", gate["note"])
+
+    def test_production_fail_is_not_overwritten_by_matching_golden(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.write_dataset(
+                root,
+                [{
+                    "record_type": "evidence",
+                    "evidence_id": "PROD-FAIL",
+                    "baseline": SHA,
+                    "gate": "production",
+                    "result": "FAIL",
+                }],
+            )
+            gate = self.gates(root, golden_sha=SHA)["production"]
+            self.assertEqual(gate["status"], "UNKNOWN")
+            self.assertIn("conflicting evidence", gate["note"])
 
 
 if __name__ == "__main__":
