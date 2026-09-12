@@ -11,6 +11,7 @@ from .status_model import GATES, derive_blockers, make_gate, validate_status_mod
 
 CONTROL_REPO = "linwuyen/ASR5K_AGENT"
 EXECUTION_REPO = "linwuyen/ASR5K_v2_28384"
+EVIDENCE_UNAVAILABLE_NOTE = "evidence source malformed or unreadable"
 
 
 def _unknown_repo(repository: str) -> dict:
@@ -25,6 +26,10 @@ def _unknown_repo(repository: str) -> dict:
 
 def _read_identity(repository: str, root: Path) -> dict:
     return {"repository": repository, **repo_identity(root), "status": "CURRENT"}
+
+
+def _unknown_evidence_qualification(note: str) -> list[dict]:
+    return [make_gate(gate, "UNKNOWN", note=note) for gate in GATES]
 
 
 def build_live_status(
@@ -71,9 +76,13 @@ def build_live_status(
             health = "DEGRADED"
 
     if firmware.get("sha"):
-        qualification = qualification_for_sha(
-            Path(data_root), firmware["sha"], golden
-        )
+        try:
+            qualification = qualification_for_sha(
+                Path(data_root), firmware["sha"], golden
+            )
+        except (OSError, ValueError):
+            health = "DEGRADED"
+            qualification = _unknown_evidence_qualification(EVIDENCE_UNAVAILABLE_NOTE)
         by_gate = {row["gate"]: row for row in qualification}
         by_gate["source"] = make_gate(
             "source",
@@ -135,14 +144,22 @@ def build_live_evidence(
 ) -> dict:
     status = build_live_status(agent_root, firmware_root, data_root)
     execution_sha = status.get("execution_plane", {}).get("sha")
-    return {
-        "schema_version": "1.0",
-        "mode": "LIVE",
-        "execution_sha": execution_sha,
-        "control_plane_sha": status.get("control_plane", {}).get("sha"),
-        "records": (
+    note = None
+    try:
+        records = (
             evidence_details_for_sha(Path(data_root), execution_sha)
             if execution_sha
             else []
-        ),
+        )
+    except (OSError, ValueError):
+        records = []
+        note = EVIDENCE_UNAVAILABLE_NOTE
+    return {
+        "schema_version": "1.0",
+        "mode": "LIVE",
+        "health": "DEGRADED" if note else status.get("health", "OK"),
+        "execution_sha": execution_sha,
+        "control_plane_sha": status.get("control_plane", {}).get("sha"),
+        "records": records,
+        "note": note,
     }
