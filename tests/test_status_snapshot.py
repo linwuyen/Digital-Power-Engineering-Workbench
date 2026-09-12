@@ -4,6 +4,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+from workbench.status_model import GATES, make_gate
 from workbench.status_snapshot import (
     load_snapshot,
     sanitize_public_status,
@@ -14,6 +15,15 @@ SHA = "a" * 40
 
 
 def live_model() -> dict:
+    qualification = [make_gate(gate, "UNKNOWN") for gate in GATES]
+    qualification[GATES.index("source")] = make_gate(
+        "source",
+        "PASS",
+        sha=SHA,
+        evidence="git rev-parse HEAD",
+        evidence_type="git_identity",
+        timestamp="2026-09-12T10:00:00+00:00",
+    )
     return {
         "schema_version": "1.0",
         "mode": "LIVE",
@@ -45,17 +55,7 @@ def live_model() -> dict:
             "evidence_sha_match": True,
             "control_plane_revision_known": True,
         },
-        "qualification": [
-            {
-                "gate": "source",
-                "status": "PASS",
-                "sha": SHA,
-                "evidence": "git rev-parse HEAD",
-                "evidence_type": "git_identity",
-                "timestamp": "2026-09-12T10:00:00+00:00",
-                "note": None,
-            }
-        ],
+        "qualification": qualification,
         "blockers": [],
         "freshness": {"status": "LIVE", "age_seconds": 0, "sources": []},
     }
@@ -70,6 +70,21 @@ class StatusSnapshotTests(unittest.TestCase):
         self.assertNotIn("path", public["execution_plane"])
         self.assertIsNone(public["execution_plane"]["dirty"])
         self.assertEqual(public["freshness"]["status"], "SNAPSHOT")
+
+    def test_sanitizer_does_not_publish_absolute_local_paths_in_strings(self):
+        model = live_model()
+        model["qualification"][GATES.index("build")] = make_gate(
+            "build",
+            "PASS",
+            sha=SHA,
+            evidence="C:\\Users\\private\\build.log",
+            evidence_type="regression_history",
+            note="local source /home/private/asr5k/build.log",
+        )
+        public = sanitize_public_status(model, generated_at="2026-09-12T10:00:00+00:00")
+        encoded = json.dumps(public)
+        self.assertNotIn("C:\\\\Users\\\\private", encoded)
+        self.assertNotIn("/home/private/asr5k", encoded)
 
     def test_stale_snapshot_is_downgraded_and_gets_blocker(self):
         public = sanitize_public_status(live_model(), generated_at="2026-09-12T10:00:00+00:00")
