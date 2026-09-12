@@ -15,18 +15,36 @@ BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
 
 
 class FinalWorkbenchIntegrationTests(unittest.TestCase):
-    def test_browser_loader_reaches_snapshot_layer(self):
+    def test_status_console_is_default_and_loader_reaches_both_status_layers(self):
+        html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
         i18n = (ROOT / "static" / "i18n.js").read_text(encoding="utf-8")
         loader = (ROOT / "static" / "eng" / "loader.js").read_text(encoding="utf-8")
+        status = (ROOT / "static" / "eng" / "status_console.js").read_text(encoding="utf-8")
         source = (ROOT / "static" / "eng" / "data_source.js").read_text(encoding="utf-8")
+        self.assertIn('id="status" class="panel active"', html)
         self.assertIn("./eng/loader.js", i18n)
+        self.assertIn("./eng/status_console.js", loader)
         self.assertIn("./eng/data_source.js", loader)
+        self.assertIn("/api/status/summary", status)
+        self.assertIn("../engineering_data/status/status_snapshot.json", status)
+        self.assertNotIn("ASR5K_READ_TOKEN", status)
         self.assertIn("../engineering_data/", source)
         self.assertIn("FAIL CLOSED", source)
         self.assertIn("DERIVED SNAPSHOT", source)
         self.assertIn("SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS", source)
         self.assertIn("federation/source_manifest.json", source)
         self.assertIn("authoritative_engineering_truth", source)
+
+    def test_documentation_explains_live_snapshot_and_generator(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        status_doc = (ROOT / "docs" / "CURRENT_STATUS.md").read_text(encoding="utf-8")
+        self.assertIn("ASR5K Engineering Console", readme)
+        self.assertIn("/api/status/summary", readme)
+        self.assertIn("generate_status_snapshot.py", readme)
+        self.assertIn("LIVE", readme)
+        self.assertIn("SNAPSHOT", readme)
+        self.assertIn("View / Analysis Plane", status_doc)
+        self.assertIn("UNKNOWN", status_doc)
 
     def test_snapshot_baselines_are_identical(self):
         paths = [
