@@ -1,0 +1,61 @@
+{
+  "authoritative_engineering_truth": false,
+  "blockers": [
+    {"category": "UNKNOWN_EVIDENCE", "source": "source", "status": "UNKNOWN", "note": "public snapshot generated without local owner repositories"},
+    {"category": "UNKNOWN_EVIDENCE", "source": "build", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "regression", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "artifact", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "flash", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "board", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "hil", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "protection", "status": "UNKNOWN", "note": null},
+    {"category": "UNKNOWN_EVIDENCE", "source": "production", "status": "UNKNOWN", "note": null}
+  ],
+  "control_plane": {
+    "branch": null,
+    "dirty": null,
+    "repository": "linwuyen/ASR5K_AGENT",
+    "sha": null,
+    "status": "UNAVAILABLE"
+  },
+  "execution_plane": {
+    "branch": null,
+    "dirty": null,
+    "repository": "linwuyen/ASR5K_v2_28384",
+    "sha": null,
+    "status": "UNAVAILABLE"
+  },
+  "freshness": {
+    "age_seconds": 0,
+    "sources": [
+      {"available": false, "repository": "linwuyen/ASR5K_AGENT"},
+      {"available": false, "repository": "linwuyen/ASR5K_v2_28384"}
+    ],
+    "status": "SNAPSHOT"
+  },
+  "generated_at": "2026-09-12T14:00:00+00:00",
+  "health": "DEGRADED",
+  "identity": {
+    "control_plane_revision_known": false,
+    "evidence_sha_match": null,
+    "relation_to_golden": "UNKNOWN"
+  },
+  "mode": "SNAPSHOT",
+  "product_baseline": {
+    "golden_sha": null,
+    "release_ref": null,
+    "source": "CURRENT_PRODUCT_BASELINE.md"
+  },
+  "qualification": [
+    {"evidence": null, "evidence_type": null, "gate": "source", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "build", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "regression", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "artifact", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "flash", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "board", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "hil", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "protection", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null},
+    {"evidence": null, "evidence_type": null, "gate": "production", "note": null, "sha": null, "status": "UNKNOWN", "timestamp": null}
+  ],
+  "schema_version": "1.0"
+}
