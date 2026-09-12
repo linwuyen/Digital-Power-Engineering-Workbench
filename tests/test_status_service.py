@@ -32,12 +32,7 @@ def init_repo(root: Path, *, baseline: bool = False) -> str:
         )
         git(root, "add", "CURRENT_PRODUCT_BASELINE.md")
         git(root, "commit", "-m", "baseline declaration")
-        declared = git(root, "rev-parse", "HEAD~1")
-        text = (root / "CURRENT_PRODUCT_BASELINE.md").read_text(encoding="utf-8").replace(sha, declared)
-        (root / "CURRENT_PRODUCT_BASELINE.md").write_text(text, encoding="utf-8")
-        git(root, "add", "CURRENT_PRODUCT_BASELINE.md")
-        git(root, "commit", "-m", "pin baseline")
-        # Return current HEAD; declared golden is an ancestor, so relation is AHEAD.
+        # Current HEAD is intentionally one commit ahead of the declared GOLDEN.
         return git(root, "rev-parse", "HEAD")
     return sha
 
