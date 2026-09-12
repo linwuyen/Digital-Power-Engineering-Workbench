@@ -5,6 +5,7 @@ from pathlib import Path
 
 from workbench.status_live import (
     parse_product_baseline,
+    read_product_baseline,
     relation_to_golden,
     repo_identity,
 )
@@ -57,6 +58,35 @@ class StatusLiveTests(unittest.TestCase):
                 "FINAL / GOLDEN firmware SHA:\n"
                 "c31ecc57a54f9f84874af40234907be357638ebe\n"
             )
+
+    def test_product_baseline_comes_from_committed_head_not_dirty_worktree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.make_repo(root)
+            committed_golden = "a" * 40
+            dirty_golden = "b" * 40
+            baseline = root / "CURRENT_PRODUCT_BASELINE.md"
+            baseline.write_text(
+                "FINAL / GOLDEN firmware SHA:\n"
+                f"{committed_golden}\n\n"
+                "Pinned release ref:\nrelease/committed\n",
+                encoding="utf-8",
+            )
+            git(root, "add", "CURRENT_PRODUCT_BASELINE.md")
+            git(root, "commit", "-m", "baseline")
+            head = git(root, "rev-parse", "HEAD")
+
+            baseline.write_text(
+                "FINAL / GOLDEN firmware SHA:\n"
+                f"{dirty_golden}\n\n"
+                "Pinned release ref:\nrelease/dirty\n",
+                encoding="utf-8",
+            )
+
+            parsed = read_product_baseline(root)
+            self.assertEqual(parsed["golden_sha"], committed_golden)
+            self.assertEqual(parsed["release_ref"], "release/committed")
+            self.assertEqual(parsed["firmware_repository_sha"], head)
 
     def test_relation_is_match_then_ahead(self):
         with tempfile.TemporaryDirectory() as tmp:
