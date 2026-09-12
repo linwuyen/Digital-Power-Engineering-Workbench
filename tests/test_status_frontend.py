@@ -27,8 +27,9 @@ class StatusFrontendTests(unittest.TestCase):
     def test_dynamic_engineering_panels_are_inserted_before_demo_group(self):
         html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
         common = (ROOT / "static" / "eng" / "common.js").read_text(encoding="utf-8")
-        self.assertIn('id="demo-reference-nav"', html)
-        self.assertIn("demo-reference-nav", common)
+        self.assertIn("DEMO / REFERENCE", html)
+        self.assertIn("DEMO / REFERENCE", common)
+        self.assertIn("find(el=>el.textContent.trim()==='DEMO / REFERENCE')", common)
         self.assertIn("insertBefore(b,anchor)", common.replace(" ", ""))
 
 
