@@ -177,7 +177,14 @@ def validate_status_model(model: dict) -> None:
     if golden_sha is not None and not _valid_sha(golden_sha):
         raise ValueError("product_baseline.golden_sha must be 40 hex characters or null")
 
-    for raw in model.get("qualification", []):
+    qualification = model.get("qualification", [])
+    if not isinstance(qualification, list):
+        raise ValueError("qualification must be a list")
+    actual_gates = [str(raw.get("gate", "")).lower() for raw in qualification if isinstance(raw, dict)]
+    if len(actual_gates) != len(GATES) or set(actual_gates) != set(GATES):
+        raise ValueError("qualification must contain every gate exactly once")
+
+    for raw in qualification:
         gate = str(raw.get("gate", "")).lower()
         status = str(raw.get("status", "")).upper()
         if gate not in GATES:
