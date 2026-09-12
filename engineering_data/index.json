@@ -46,6 +46,7 @@
     "test_catalog": "verification/test_catalog.json",
     "hardware_results": "verification/hardware_results/index.json",
     "regression_history": "verification/regression_history/index.json",
+    "status_snapshot": "status/status_snapshot.json",
     "subsystem_index": "ai/subsystem_index.json",
     "safety_invariants": "ai/safety_invariants.json",
     "critical_paths": "ai/critical_paths.json",
