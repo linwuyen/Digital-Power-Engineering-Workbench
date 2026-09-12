@@ -106,6 +106,24 @@ class StatusServiceTests(unittest.TestCase):
             source = next(x for x in model["qualification"] if x["gate"] == "source")
             self.assertEqual(source["status"], "PASS")
 
+    def test_malformed_evidence_degrades_to_unknown_instead_of_crashing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            agent = base / "agent"; agent.mkdir()
+            firmware = base / "firmware"; firmware.mkdir()
+            data = base / "data"
+            init_repo(agent)
+            init_repo(firmware, baseline=True)
+            write_empty_data(data)
+            (data / "evidence" / "evidence_ledger.jsonl").write_text("{not-json}\n", encoding="utf-8")
+            model = build_live_status(agent, firmware, data)
+            self.assertEqual(model["health"], "DEGRADED")
+            source = next(x for x in model["qualification"] if x["gate"] == "source")
+            build = next(x for x in model["qualification"] if x["gate"] == "build")
+            self.assertEqual(source["status"], "PASS")
+            self.assertEqual(build["status"], "UNKNOWN")
+            self.assertIn("evidence source malformed or unreadable", build["note"])
+
 
 if __name__ == "__main__":
     unittest.main()
