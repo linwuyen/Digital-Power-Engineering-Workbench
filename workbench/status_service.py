@@ -93,8 +93,10 @@ def build_live_status(
         for row in qualification
         if row.get("status") in {"PASS", "FAIL", "GOLDEN"}
     ]
-    evidence_sha_match = bool(execution_sha) and all(
-        row.get("sha") == execution_sha for row in strong_rows
+    evidence_sha_match = (
+        all(row.get("sha") == execution_sha for row in strong_rows)
+        if execution_sha
+        else None
     )
 
     model = {
