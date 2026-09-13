@@ -1,9 +1,34 @@
 {
-  "schema_version":"1.0",
-  "baseline":"2b72f50648d86c11547645882248eed69f12892f",
-  "records":[],
-  "status":"no_result_claimed",
-  "required_record_fields":[
+  "schema_version": "1.0",
+  "baseline": "2b72f50648d86c11547645882248eed69f12892f",
+  "records": [
+    {
+      "timestamp": "2026-09-11T10:18:18.829252+00:00",
+      "dut_repository": "linwuyen/ASR5K_v2_28384",
+      "dut_commit": "69919ddcaec1be5f0cf6fba24a21acc738587290",
+      "gate": "hil",
+      "programmed_artifact_identity": "NOT_PROGRAMMED; hardware preflight failed before flash or functional HIL",
+      "test_fixture": "ASR5K HIL Qualification / hardware-preflight",
+      "instrument_or_host_identity": "asr5k-ci-company / POWER-532A86 / TI XDS100v2",
+      "procedure": "Windows bridge -> CCS/DSS/XDS hardware preflight -> CPU1 connect/reset-halt",
+      "result": "BLOCKED",
+      "evidence": "github-actions://linwuyen/ASR5K_v2_28384/runs/34588487809#hardware-preflight",
+      "workflow": "ASR5K HIL Qualification",
+      "run_id": "34588487809",
+      "run_number": 63,
+      "fail_layer": "L5_DEBUG_INFRA",
+      "fail_stage": "CPU1_CONNECT",
+      "last_pass": "L4_CI_INFRA",
+      "error_id": "ASR-VFY-0503",
+      "functional_hil_status": "NOT_RUN",
+      "failure_detail": "TI DSS/XDS100 connection failed with FTDI/emulation error before the board could be programmed or functional HIL executed.",
+      "local_evidence_fingerprints_sha256": "2eda77febdc3f978d6153935ad43bb21022c9feffb2332745acf7d6fa0c25552",
+      "local_evidence_manifest_sha256": "e78e45f416aa637365486fb9a941390589050cb8d0f0252ca67d2f6fcb228cf6",
+      "evidence_basis": "Exact candidate and harness SHA both resolved to 69919ddcaec1be5f0cf6fba24a21acc738587290. Unified HIL evidence reported FAIL at debug infrastructure while L7 functional HIL remained NOT_RUN."
+    }
+  ],
+  "status": "exact_sha_evidence_recorded",
+  "required_record_fields": [
     "timestamp",
     "dut_repository",
     "dut_commit",
@@ -14,5 +39,5 @@
     "result",
     "evidence"
   ],
-  "rule":"Do not add PASS/FAIL without binding the measurement to an exact DUT/artifact identity."
+  "rule": "Hardware evidence may record BLOCKED/PENDING when exact-SHA execution is prevented by infrastructure; it must not be upgraded to functional HIL FAIL or PASS without the corresponding measurement."
 }

@@ -1,8 +1,31 @@
 {
-  "schema_version":"1.0",
-  "records":[],
-  "status":"no_result_claimed",
-  "required_record_fields":[
+  "schema_version": "1.0",
+  "records": [
+    {
+      "timestamp": "2026-09-11T10:17:15.662727+00:00",
+      "repository": "linwuyen/ASR5K_v2_28384",
+      "commit": "69919ddcaec1be5f0cf6fba24a21acc738587290",
+      "gate": "regression",
+      "test_suite": "Firmware CI / host-regression",
+      "toolchain": "GitHub Actions self-hosted asr5k-ci-company / Python 3.12",
+      "result": "PASS",
+      "artifact_or_log": "github-actions://linwuyen/ASR5K_v2_28384/runs/34588402658#host-regression",
+      "workflow": "Firmware CI",
+      "run_id": "34588402658",
+      "run_number": 2149,
+      "terminal_result": "PASS",
+      "terminal_reason": "all_gates_passed",
+      "regression_gate_result": "PASS_WITH_BASELINE_DEBT",
+      "golden_sha": "c31ecc57a54f9f84874af40234907be357638ebe",
+      "baseline_failure_count": 11,
+      "candidate_failure_count": 11,
+      "unexpected_failure_count": 0,
+      "missing_baseline_test_count": 0,
+      "evidence_basis": "Exact checked-out SHA and generated CI evidence from Firmware CI run 34588402658. Existing 11 baseline failures were unchanged and no unexpected failures were introduced."
+    }
+  ],
+  "status": "exact_sha_evidence_recorded",
+  "required_record_fields": [
     "timestamp",
     "repository",
     "commit",
@@ -11,5 +34,5 @@
     "result",
     "artifact_or_log"
   ],
-  "rule":"Historical conversation statements are not imported as regression PASS records without exact run evidence."
+  "rule": "Regression PASS is recorded only when exact-SHA workflow evidence explicitly binds the result to the candidate commit."
 }

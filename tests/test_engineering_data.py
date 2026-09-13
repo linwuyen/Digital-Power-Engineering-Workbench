@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "engineering_data"
 BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
+QUALIFICATION_SHA = "69919ddcaec1be5f0cf6fba24a21acc738587290"
 
 
 def load_json(relative_path: str):
@@ -108,13 +109,25 @@ class EngineeringDataIntegrityTest(unittest.TestCase):
             with self.subTest(id=item["id"]):
                 self.assertIn(BASELINE, item["url"])
 
-    def test_empty_evidence_ledgers_do_not_claim_results(self):
+    def test_qualification_indexes_only_claim_exact_supported_results(self):
         hardware = load_json("verification/hardware_results/index.json")
         regression = load_json("verification/regression_history/index.json")
-        self.assertEqual(hardware["records"], [])
-        self.assertEqual(hardware["status"], "no_result_claimed")
-        self.assertEqual(regression["records"], [])
-        self.assertEqual(regression["status"], "no_result_claimed")
+
+        self.assertEqual(hardware["status"], "exact_sha_evidence_recorded")
+        self.assertEqual(regression["status"], "exact_sha_evidence_recorded")
+        self.assertEqual(len(hardware["records"]), 1)
+        self.assertEqual(len(regression["records"]), 1)
+
+        hardware_row = hardware["records"][0]
+        regression_row = regression["records"][0]
+        self.assertEqual(hardware_row["dut_commit"], QUALIFICATION_SHA)
+        self.assertEqual(hardware_row["gate"], "hil")
+        self.assertEqual(hardware_row["result"], "BLOCKED")
+        self.assertEqual(hardware_row["functional_hil_status"], "NOT_RUN")
+        self.assertEqual(regression_row["commit"], QUALIFICATION_SHA)
+        self.assertEqual(regression_row["gate"], "regression")
+        self.assertEqual(regression_row["result"], "PASS")
+        self.assertEqual(regression_row["unexpected_failure_count"], 0)
 
 
 if __name__ == "__main__":
