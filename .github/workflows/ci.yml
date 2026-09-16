@@ -78,6 +78,7 @@ jobs:
           node --check static/eng/loader.js
           node --check static/eng/common.js
           node --check static/eng/status_console.js
+          node --check static/eng/state_truth.js
           node --check static/eng/data_source.js
           node --check static/eng/profiles.js
           node --check static/eng/control_sfra.js

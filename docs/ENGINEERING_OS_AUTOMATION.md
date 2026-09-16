@@ -1,149 +1,98 @@
-# Engineering OS Automation
+# Engineering OS Read / Analysis Pipeline
 
-This layer turns `engineering_data/` from a manually curated knowledge base into a CI-protected derivative truth system.
+## Current ownership
 
-## Pipeline
+As of 2026-09-16, Workbench is the **View / Analysis Plane**. Production build, flash, physical HIL, hardware binding, evidence capture orchestration and qualification transactions belong to `linwuyen/ASR5K_v2_28384`.
+
+Workbench keeps only read/normalize/compare/derive/view behavior plus explicitly frozen historical datasets.
+
+## Active pipeline
 
 ```text
-Exact ASR5K production source
+Exact ASR5K source / execution evidence
         |
-        v
-extract_source_truth.py
+        +--> extract_source_truth.py
+        |        |
+        |        v
+        |    pinned source snapshot
+        |        |
+        |        +--> verify_truth_drift.py
         |
-        v
-source snapshot
-        |
-        +--> verify_truth_drift.py --> CI FAIL on verified-source drift
-        |
-Build / HIL / SFRA / scope evidence
-        |
-        v
-import_evidence.py
-        |
-        v
-append-only evidence ledger
-        |
-        v
-traceability.py
-        |
-        v
-Requirement -> implementation -> verification -> evidence -> qualification
+        +--> status/evidence readers
+                 |
+                 +--> traceability.py
+                 |
+                 v
+        normalized derived status / UI
 ```
 
-`hil_runner.py` is the host-intent automation shell. Mock success is reported only as `SIMULATION_PASS`. Process/hardware success is reported as `HARDWARE_RUN_PASS_UNQUALIFIED`; it does not become qualification evidence until the run is bound to exact DUT/build artifacts and imported through the evidence gate.
+The active read-only / analysis tools are:
 
-## Source Truth Extractor
+- `tools/extract_source_truth.py` — extract high-confidence source facts from an explicitly selected exact firmware baseline;
+- `tools/verify_truth_drift.py` — compare source-verified facts against the checked-in historical snapshot model;
+- `tools/traceability.py` — derive requirement status from requirement/evidence data;
+- `tools/generate_status_snapshot.py` — generate a sanitized derived status snapshot from configured owner repositories;
+- `tools/validate_federation.py` — enforce the three-repository authority boundary;
+- `tools/truth_common.py` — shared read/serialization helpers.
 
-The extractor reads only explicitly listed authoritative production files and extracts high-confidence C contracts:
+`tools/import_evidence.py` remains temporarily as a **frozen legacy snapshot writer/validator** for the historical checked-in evidence ledger. It is not the owner of current production evidence capture. New production evidence must be emitted by the Execution Plane.
 
-- SystemState / FaultState / power-sequence / command enum values
-- stable fault bitmap values
-- software timeout/settle constants
-- temporary bench gates
-- authoritative scalar SPIB addresses
-- host command queue depth/types
-- SPIB parser diagnostic threshold identifiers
+## Retired execution helpers
 
-It intentionally does **not** infer ADC analog scaling, hardware protection latency, formal SPIB acceptance deadlines, SFRA models or board qualification.
+The following duplicated Workbench execution helpers were removed after three-repository convergence:
 
-Example:
-
-```bash
-python tools/extract_source_truth.py \
-  --source-root /path/to/ASR5K_v2_28384 \
-  --baseline 2b72f50648d86c11547645882248eed69f12892f \
-  --out /tmp/asr5k-source-truth.json
-
-python tools/verify_truth_drift.py \
-  --snapshot /tmp/asr5k-source-truth.json \
-  --data-root engineering_data
+```text
+tools/auto_common.py
+tools/auto_run.py
+tools/auto_run_ext.py
+tools/ccs_build.py
+tools/evidence_agent.py
+tools/hardware_bind.py
+tools/hil_runner.py
 ```
 
-## Pinned Snapshot and Live Private Recheck
+Their production responsibilities now belong to `linwuyen/ASR5K_v2_28384`.
 
-`ASR5K_v2_28384` is a private repository. A workflow token issued to this Workbench repository does not automatically have read access to another private repository.
+Checked-in data under `engineering_data/automation/` and `engineering_data/hil/` is retained only as frozen historical/reference material. It does not restore execution authority to Workbench.
 
-Therefore CI has two explicit layers:
+## Source truth and drift policy
 
-1. **Always-on pinned check** — `engineering_data/source_truth/snapshot-2b72f506.json` is a commit-pinned snapshot extracted from the authoritative source files at `2b72f50648d86c11547645882248eed69f12892f`. Every CI run compares this snapshot with the canonical engineering dataset and fails on drift.
-2. **Optional live private-source recheck** — if a read-only repository secret named `ASR5K_READ_TOKEN` is configured, CI clones the private production branch read-only, verifies that its HEAD is still the pinned SHA, re-runs the extractor, and compares the live extraction with the canonical dataset.
+The source extractor reads only explicitly listed authoritative production files and extracts high-confidence contracts such as SystemState/FaultState vocabulary, stable fault bits, timeout constants, temporary bench gates, scalar SPIB addresses, queue depth/types and parser diagnostic identifiers.
 
-If `ASR5K_READ_TOKEN` is absent, the live check prints an explicit GitHub Actions notice and exits successfully as **SKIPPED**. That skip is not represented as a live-source PASS. The pinned source-snapshot drift gate still runs and must pass.
+It intentionally does **not** infer ADC analog calibration, formal SPIB deadlines, hardware protection shutdown latency, board qualification or production control/SFRA measurements.
 
-If the production branch later moves away from the pinned SHA, a configured live check deliberately fails until a new baseline is reviewed and qualified.
+A mismatch in a field marked source-verified is a snapshot-consistency failure. Pending values remain unavailable until evidence exists. Diagnostic counters must never be promoted into hardware-performance limits by inference.
 
-## Drift Policy
+## Evidence and traceability boundary
 
-A mismatch between exact production source and a field marked source-verified is a release blocker. Pending fields are excluded from equality comparison until they are promoted with evidence.
+A Workbench-derived status cannot be stronger than its source identity. In particular:
 
-Diagnostic counters such as `Over500` / `Over1000` remain diagnostic thresholds and cannot be reclassified as a formal response deadline by the extractor.
-
-## Evidence Import
-
-Evidence is append-only JSONL. A `PASS` import requires:
-
-- exact baseline
-- evidence ID
-- test ID
-- run ID
-- artifact ID
-- SHA-256 artifact/evidence-bundle identity
-- at least one linked requirement ID
-- timestamp
-- source/instrument
-
-Validation-only mode is the default. `--append` must be explicit.
-
-```bash
-python tools/import_evidence.py --input run.json
-python tools/import_evidence.py --input run.json --artifact-file CPU1_FLASH.out --append
+```text
+source present != build PASS
+build PASS != flash PASS
+flash PASS != board PASS
+board PASS != HIL PASS
+HIL PASS != Production qualification
 ```
 
-## Traceability
+Exact-SHA evidence does not transfer to another SHA. Regression evidence that depends on a GOLDEN baseline is valid only for the exact candidate + exact GOLDEN pair. Missing or stale identity fails closed and remains visible.
 
-```bash
-python tools/traceability.py \
-  --out /tmp/traceability.json \
-  --markdown /tmp/traceability.md
-```
+## Safety boundary
 
-A requirement becomes `QUALIFIED_BY_EVIDENCE` only when an exact-baseline `PASS` evidence record explicitly links that requirement ID. Source code or test-file existence alone never qualifies it.
+Workbench never owns OVP/OCP/OTP, PWM Trip, interlock, emergency safe-off, physical actuator authority or deterministic protection timing. Browser/network actions remain operator intent or reference simulation only.
 
-## HIL Runner
+Removing the legacy execution helpers therefore does not change firmware WCET, ISR timing, control-loop behavior, physical fault latency or hardware safety authority.
 
-Mock contract check:
+## Current CI contract
 
-```bash
-python tools/hil_runner.py \
-  --plan engineering_data/hil/reference_mock_plan.json \
-  --mode mock \
-  --out /tmp/hil-mock.json
-```
+Workbench CI verifies:
 
-Local physical gateway:
+1. Python regression tests;
+2. Python syntax for the remaining Workbench/read-only tools;
+3. engineering JSON/JSONL integrity;
+4. federated repository ownership boundaries;
+5. historical requirement traceability consistency;
+6. pinned source-snapshot truth-drift consistency;
+7. browser JavaScript syntax.
 
-```bash
-python tools/hil_runner.py \
-  --plan my-hardware-plan.json \
-  --mode process \
-  --gateway-command "python local_gateway.py" \
-  --allow-hardware \
-  --out /tmp/hil-run.json
-```
-
-The process adapter speaks newline-delimited JSON to a local gateway. The harness is limited to host intent and observation. Protection, PWM Trip, interlock and emergency shutdown remain DUT-local deterministic authority.
-
-## CI Contract
-
-Every CI run performs:
-
-1. Python/invariant regression;
-2. Python syntax checks for Workbench and automation tools;
-3. JSON/JSONL integrity checks;
-4. requirement traceability resolution;
-5. a non-qualifying HIL mock contract run;
-6. pinned exact-source snapshot drift comparison;
-7. optional live private ASR5K extraction when `ASR5K_READ_TOKEN` exists;
-8. browser JavaScript syntax checks.
-
-The automation layer is a verification and evidence framework. It does not claim board, HIL, AM3352 A/B, protection-latency or control-loop qualification until exact measured evidence is appended to the evidence ledger.
+The CI proves Workbench consistency. It does not claim production build, flash, board, HIL or protection qualification.

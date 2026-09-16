@@ -12,6 +12,7 @@ from server import ROOT, WorkbenchHandler
 
 
 BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
+# State truth convergence contract: production view has one evidence-bound source.
 
 
 class FinalWorkbenchIntegrationTests(unittest.TestCase):
@@ -20,18 +21,19 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         i18n = (ROOT / "static" / "i18n.js").read_text(encoding="utf-8")
         loader = (ROOT / "static" / "eng" / "loader.js").read_text(encoding="utf-8")
         status = (ROOT / "static" / "eng" / "status_console.js").read_text(encoding="utf-8")
+        state_truth = (ROOT / "static" / "eng" / "state_truth.js").read_text(encoding="utf-8")
         source = (ROOT / "static" / "eng" / "data_source.js").read_text(encoding="utf-8")
         self.assertIn('id="status" class="panel active"', html)
         self.assertIn("./eng/loader.js", i18n)
         self.assertIn("./eng/status_console.js", loader)
+        self.assertIn("./eng/state_truth.js", loader)
         self.assertIn("./eng/data_source.js", loader)
         self.assertIn("/api/status/summary", status)
         self.assertIn("../engineering_data/status/status_snapshot.json", status)
         self.assertNotIn("ASR5K_READ_TOKEN", status)
         self.assertIn("../engineering_data/", source)
-        self.assertIn("FAIL CLOSED", source)
+        self.assertIn("FAIL CLOSED", state_truth)
         self.assertIn("DERIVED SNAPSHOT", source)
-        self.assertIn("SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS", source)
         self.assertIn("federation/source_manifest.json", source)
         self.assertIn("authoritative_engineering_truth", source)
 
@@ -67,6 +69,56 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         self.assertEqual(manifest["snapshot_policy"]["engineering_data_role"], "derived_snapshot_cache")
         self.assertFalse(manifest["snapshot_policy"]["may_override_control_plane"])
         self.assertFalse(manifest["snapshot_policy"]["may_override_execution_plane"])
+
+    def test_view_plane_does_not_ship_execution_owners(self):
+        retired_execution_paths = [
+            "tools/auto_common.py",
+            "tools/auto_run.py",
+            "tools/auto_run_ext.py",
+            "tools/ccs_build.py",
+            "tools/evidence_agent.py",
+            "tools/hardware_bind.py",
+            "tools/hil_runner.py",
+            "config/auto_run.ci.json",
+            "config/auto_run.local.example.json",
+        ]
+        present = [path for path in retired_execution_paths if (ROOT / path).exists()]
+        self.assertEqual(present, [])
+        for retained_reader in [
+            "tools/extract_source_truth.py",
+            "tools/generate_status_snapshot.py",
+            "tools/traceability.py",
+            "tools/validate_federation.py",
+            "tools/verify_truth_drift.py",
+        ]:
+            self.assertTrue((ROOT / retained_reader).is_file(), retained_reader)
+
+    def test_production_state_truth_is_separate_from_reference_simulator(self):
+        loader = (ROOT / "static" / "eng" / "loader.js").read_text(encoding="utf-8")
+        state_truth_path = ROOT / "static" / "eng" / "state_truth.js"
+        self.assertTrue(state_truth_path.is_file(), "state_truth.js must own the production state shell")
+        state_truth = state_truth_path.read_text(encoding="utf-8")
+        source = (ROOT / "static" / "eng" / "data_source.js").read_text(encoding="utf-8")
+
+        self.assertIn("./eng/state_truth.js", loader)
+        self.assertLess(loader.index("./eng/state_truth.js"), loader.index("./eng/data_source.js"))
+        self.assertIn("state-truth", state_truth)
+        self.assertIn("DEMO / REFERENCE", state_truth)
+        self.assertIn("REFERENCE MODEL", state_truth)
+        self.assertIn('data-panel="state"', state_truth)
+        self.assertIn('data-panel="contract"', state_truth)
+
+        # Production state truth owns its own minimal input set; unrelated analysis data
+        # must not be able to make the state view unavailable.
+        self.assertIn("firmware/state_machine.json", state_truth)
+        self.assertIn("federation/source_manifest.json", state_truth)
+        self.assertIn("index.json", state_truth)
+        self.assertIn("initializeProductionStateTruth", state_truth)
+        self.assertIn("prodStateGraph", state_truth)
+        self.assertIn("STATE TRUTH UNAVAILABLE", state_truth)
+        self.assertNotIn("firmware/state_machine.json", source)
+        self.assertNotIn("renderProductionState", source)
+        self.assertNotIn("prodStateGraph", source)
 
     def test_local_server_exposes_snapshot_data_and_blocks_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
