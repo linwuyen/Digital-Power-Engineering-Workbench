@@ -103,6 +103,15 @@ def _resolve_gate(gate: str, candidates: list[dict]) -> dict:
     pending = [row for row in ordered if row.get("status") == "PENDING"]
     if pending:
         return pending[0]
+    stale = [row for row in ordered if row.get("status") == "STALE"]
+    if stale:
+        return stale[0]
+    mismatch = [row for row in ordered if row.get("status") == "MISMATCH"]
+    if mismatch:
+        return mismatch[0]
+    unknown = [row for row in ordered if row.get("status") == "UNKNOWN"]
+    if unknown:
+        return unknown[0]
     return make_gate(gate, "UNKNOWN")
 
 
@@ -153,9 +162,6 @@ def qualification_for_sha(
     for row in regression.get("records", []):
         if not isinstance(row, dict):
             continue
-        if str(row.get("result", "")).upper() == "PASS":
-            if not current_golden_sha or row.get("golden_sha") != current_golden_sha:
-                continue
         normalized = _record_gate(
             row,
             "commit",
@@ -163,8 +169,37 @@ def qualification_for_sha(
             row.get("evidence_id") or row.get("artifact_or_log"),
             "regression_history",
         )
-        if normalized:
-            candidates[normalized["gate"]].append(normalized)
+        if not normalized:
+            continue
+        if normalized["status"] == "PASS":
+            evidence_golden_sha = row.get("golden_sha")
+            if not current_golden_sha:
+                normalized = make_gate(
+                    normalized["gate"],
+                    "UNKNOWN",
+                    sha=normalized["sha"],
+                    evidence=normalized["evidence"],
+                    evidence_type=normalized["evidence_type"],
+                    timestamp=normalized["timestamp"],
+                    note=(
+                        f"regression evidence GOLDEN {evidence_golden_sha or 'UNKNOWN'} cannot be qualified: "
+                        "current GOLDEN is unavailable"
+                    ),
+                )
+            elif evidence_golden_sha != current_golden_sha:
+                normalized = make_gate(
+                    normalized["gate"],
+                    "STALE",
+                    sha=normalized["sha"],
+                    evidence=normalized["evidence"],
+                    evidence_type=normalized["evidence_type"],
+                    timestamp=normalized["timestamp"],
+                    note=(
+                        f"regression evidence GOLDEN {evidence_golden_sha or 'UNKNOWN'} "
+                        f"!= current GOLDEN {current_golden_sha}"
+                    ),
+                )
+        candidates[normalized["gate"]].append(normalized)
 
     hardware = _json(root / "verification" / "hardware_results" / "index.json")
     for row in hardware.get("records", []):
