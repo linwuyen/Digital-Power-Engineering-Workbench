@@ -77,6 +77,8 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
             "tools/evidence_agent.py",
             "tools/hardware_bind.py",
             "tools/hil_runner.py",
+            "config/auto_run.ci.json",
+            "config/auto_run.local.example.json",
         ]
         present = [path for path in retired_execution_paths if (ROOT / path).exists()]
         self.assertEqual(present, [])
