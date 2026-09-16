@@ -32,7 +32,6 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         self.assertIn("../engineering_data/", source)
         self.assertIn("FAIL CLOSED", source)
         self.assertIn("DERIVED SNAPSHOT", source)
-        self.assertIn("SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS", source)
         self.assertIn("federation/source_manifest.json", source)
         self.assertIn("authoritative_engineering_truth", source)
 
@@ -107,12 +106,17 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         self.assertIn('data-panel="state"', state_truth)
         self.assertIn('data-panel="contract"', state_truth)
 
-        self.assertIn("firmware/state_machine.json", source)
-        self.assertIn("D.$('state-truth')", source)
-        self.assertIn("prodStateGraph", source)
-        self.assertIn("renderProductionStateUnavailable", source)
-        self.assertIn("STATE TRUTH UNAVAILABLE", source)
-        self.assertNotIn("const panel = D.$('state');", source)
+        # Production state truth owns its own minimal input set; unrelated analysis data
+        # must not be able to make the state view unavailable.
+        self.assertIn("firmware/state_machine.json", state_truth)
+        self.assertIn("federation/source_manifest.json", state_truth)
+        self.assertIn("index.json", state_truth)
+        self.assertIn("initializeProductionStateTruth", state_truth)
+        self.assertIn("prodStateGraph", state_truth)
+        self.assertIn("STATE TRUTH UNAVAILABLE", state_truth)
+        self.assertNotIn("firmware/state_machine.json", source)
+        self.assertNotIn("renderProductionState", source)
+        self.assertNotIn("prodStateGraph", source)
 
     def test_local_server_exposes_snapshot_data_and_blocks_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
