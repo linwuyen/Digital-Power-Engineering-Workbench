@@ -68,6 +68,27 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         self.assertFalse(manifest["snapshot_policy"]["may_override_control_plane"])
         self.assertFalse(manifest["snapshot_policy"]["may_override_execution_plane"])
 
+    def test_view_plane_does_not_ship_execution_owners(self):
+        retired_execution_paths = [
+            "tools/auto_common.py",
+            "tools/auto_run.py",
+            "tools/auto_run_ext.py",
+            "tools/ccs_build.py",
+            "tools/evidence_agent.py",
+            "tools/hardware_bind.py",
+            "tools/hil_runner.py",
+        ]
+        present = [path for path in retired_execution_paths if (ROOT / path).exists()]
+        self.assertEqual(present, [])
+        for retained_reader in [
+            "tools/extract_source_truth.py",
+            "tools/generate_status_snapshot.py",
+            "tools/traceability.py",
+            "tools/validate_federation.py",
+            "tools/verify_truth_drift.py",
+        ]:
+            self.assertTrue((ROOT / retained_reader).is_file(), retained_reader)
+
     def test_local_server_exposes_snapshot_data_and_blocks_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
