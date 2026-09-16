@@ -11,7 +11,7 @@ DIFFERENT_GOLDEN = "1111111111111111111111111111111111111111"
 
 
 class RealQualificationEvidenceTests(unittest.TestCase):
-    def gates(self, golden_sha: str = EVIDENCE_GOLDEN) -> dict[str, dict]:
+    def gates(self, golden_sha: str | None = EVIDENCE_GOLDEN) -> dict[str, dict]:
         return {
             row["gate"]: row
             for row in qualification_for_sha(
@@ -35,10 +35,29 @@ class RealQualificationEvidenceTests(unittest.TestCase):
             "github-actions://linwuyen/ASR5K_v2_28384/runs/34588402658#host-regression",
         )
 
-    def test_regression_pass_is_not_reused_after_golden_changes(self):
+    def test_regression_pass_becomes_stale_after_golden_changes_with_visible_reason(self):
         gate = self.gates(DIFFERENT_GOLDEN)["regression"]
+        self.assertEqual(gate["status"], "STALE")
+        self.assertEqual(gate["sha"], SHA)
+        self.assertEqual(gate["evidence_type"], "regression_history")
+        self.assertEqual(
+            gate["evidence"],
+            "github-actions://linwuyen/ASR5K_v2_28384/runs/34588402658#host-regression",
+        )
+        self.assertIn(EVIDENCE_GOLDEN, gate["note"])
+        self.assertIn(DIFFERENT_GOLDEN, gate["note"])
+
+    def test_regression_pass_is_unknown_when_current_golden_is_unavailable_with_visible_reason(self):
+        gate = self.gates(None)["regression"]
         self.assertEqual(gate["status"], "UNKNOWN")
-        self.assertIsNone(gate["evidence"])
+        self.assertEqual(gate["sha"], SHA)
+        self.assertEqual(gate["evidence_type"], "regression_history")
+        self.assertEqual(
+            gate["evidence"],
+            "github-actions://linwuyen/ASR5K_v2_28384/runs/34588402658#host-regression",
+        )
+        self.assertIn("current GOLDEN is unavailable", gate["note"])
+        self.assertIn(EVIDENCE_GOLDEN, gate["note"])
 
     def test_69919dd_hil_is_pending_on_real_debug_infrastructure_blocker(self):
         gate = self.gates()["hil"]
