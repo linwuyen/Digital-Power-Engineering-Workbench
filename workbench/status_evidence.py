@@ -148,10 +148,14 @@ def qualification_for_sha(
         if normalized:
             candidates[normalized["gate"]].append(normalized)
 
+    current_golden_sha = golden.get("golden_sha")
     regression = _json(root / "verification" / "regression_history" / "index.json")
     for row in regression.get("records", []):
         if not isinstance(row, dict):
             continue
+        if str(row.get("result", "")).upper() == "PASS":
+            if not current_golden_sha or row.get("golden_sha") != current_golden_sha:
+                continue
         normalized = _record_gate(
             row,
             "commit",
