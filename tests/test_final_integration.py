@@ -12,6 +12,7 @@ from server import ROOT, WorkbenchHandler
 
 
 BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
+# State truth convergence contract: production view has one evidence-bound source.
 
 
 class FinalWorkbenchIntegrationTests(unittest.TestCase):
