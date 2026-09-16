@@ -3,6 +3,31 @@
   const D = window.DPWE;
   if (!D) return;
 
+  const DATA_ROOT = '../engineering_data/';
+  const STATE_PATHS = {
+    index: 'index.json',
+    federation: 'federation/source_manifest.json',
+    state: 'firmware/state_machine.json'
+  };
+
+  const esc = value => String(value ?? '')
+    .replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;').replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  const statusClass = status => {
+    const s = String(status || '').toUpperCase();
+    if (s === 'VERIFIED' || s === 'VERIFIED_SOURCE' || s === 'SOURCE_VERIFIED') return 'truth-ok';
+    if (s === 'PENDING' || s.startsWith('PENDING_') || s === 'STALE' || s === 'SNAPSHOT') return 'truth-pending';
+    return 'truth-not-claimed';
+  };
+
+  async function loadJson(path) {
+    const response = await fetch(`${DATA_ROOT}${path}`, {cache: 'no-store'});
+    if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+    return response.json();
+  }
+
   function referenceBoundary(panel, zh, en) {
     if (!panel || panel.querySelector('.state-reference-boundary')) return;
     const head = panel.querySelector('.panel-head');
@@ -77,6 +102,102 @@
     return false;
   }
 
+  function renderProductionState(state) {
+    if (!state || !Array.isArray(state.system_states)) {
+      renderProductionStateUnavailable(new Error('state snapshot missing SystemState vocabulary'));
+      return;
+    }
+
+    const badge = D.$('stateTruthStatus');
+    if (badge) {
+      badge.classList.remove('danger');
+      badge.textContent = 'SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS';
+    }
+
+    const authority = D.$('prodAuthorityCards');
+    if (authority) {
+      const rows = [
+        ['Snapshot SystemState owner', state.owner || 'CPU1', state.trust || 'verified_source'],
+        ['Browser authority', 'read-only view', 'verified_source'],
+        ['Transition completeness', state.transition_completeness || 'partial', 'pending_verification']
+      ];
+      authority.innerHTML = rows.map(([k,v,t]) =>
+        `<div class="card authority ${statusClass(t)}"><span>${esc(k)}</span><strong>${esc(v)}</strong><small>${esc(t)}</small></div>`).join('');
+    }
+
+    const graph = D.$('prodStateGraph');
+    if (graph) {
+      graph.innerHTML = state.system_states.map(x =>
+        `<button type="button" class="state-node ${x.id === 'FAULT' ? 'fault-node' : ''}" data-prod-state="${esc(x.id)}"><span>${esc(x.id)}</span><small>${esc(x.value)}</small></button>`).join('');
+      graph.querySelectorAll('[data-prod-state]').forEach(button => button.addEventListener('click', () => {
+        const id = button.dataset.prodState;
+        const selected = state.system_states.find(x => x.id === id);
+        const detail = D.$('prodStateDetail');
+        if (detail) detail.innerHTML = `
+          <h3>${esc(id)}</h3>
+          <p><b>enum value:</b> ${esc(selected?.value)}</p>
+          <p><b>snapshot owner:</b> ${esc(state.owner)}</p>
+          <p><b>trust within snapshot:</b> ${esc(state.trust)}</p>
+          <p class="note">Current live behavior must be checked against the Execution Plane exact SHA.</p>`;
+      }));
+    }
+
+    const transitions = D.$('prodTransitionList');
+    if (transitions) {
+      transitions.innerHTML = `
+        <div class="truth-boundary truth-pending"><strong>FAIL CLOSED</strong><span data-eng-zh="完整 transition/guard 未包含於此 pinned snapshot；只顯示已擷取且有 evidence 的 transition。" data-eng-en="The complete transition/guard table is not present in this pinned snapshot. Only extracted transitions with evidence are shown.">完整 transition/guard 未包含於此 pinned snapshot；只顯示已擷取且有 evidence 的 transition。</span></div>
+        ${(state.verified_transitions || []).map(t => `<div class="transition"><b>${esc(t.from)} → ${esc(t.to)}</b><span>${esc(t.guard)}</span><small>${esc(t.evidence)}</small></div>`).join('')}`;
+    }
+    const history = D.$('prodTransitionHistory');
+    if (history) history.innerHTML = `<p class="note">${esc((state.pending || []).join(' · '))}</p>`;
+  }
+
+  function renderProductionStateUnavailable(error) {
+    const reason = error?.message || 'state snapshot unavailable';
+    const badge = D.$('stateTruthStatus');
+    if (badge) {
+      badge.classList.add('danger');
+      badge.textContent = 'STATE TRUTH UNAVAILABLE';
+    }
+    const authority = D.$('prodAuthorityCards');
+    if (authority) authority.innerHTML = '<div class="card authority truth-not-claimed"><span>Production state truth</span><strong>UNAVAILABLE</strong><small>fail-closed</small></div>';
+    const graph = D.$('prodStateGraph');
+    if (graph) graph.innerHTML = '<div class="truth-boundary truth-not-claimed"><strong>FAIL CLOSED</strong><span>No reference state machine is substituted for missing production state truth.</span></div>';
+    const detail = D.$('prodStateDetail');
+    if (detail) detail.innerHTML = `<p class="note">${esc(reason)}</p>`;
+    const transitions = D.$('prodTransitionList');
+    if (transitions) transitions.innerHTML = '<div class="truth-boundary truth-not-claimed"><strong>UNKNOWN</strong><span>Transition truth unavailable.</span></div>';
+    const history = D.$('prodTransitionHistory');
+    if (history) history.innerHTML = '<p class="note">No production transition claim is made.</p>';
+  }
+
+  async function initializeProductionStateTruth() {
+    try {
+      const [index, federation, state] = await Promise.all([
+        loadJson(STATE_PATHS.index),
+        loadJson(STATE_PATHS.federation),
+        loadJson(STATE_PATHS.state)
+      ]);
+      if (index.authoritative_engineering_truth !== false || federation.authoritative_engineering_truth !== false) {
+        throw new Error('state truth boundary invalid: Workbench must remain a derived view');
+      }
+      if (index.baseline?.commit !== state.baseline) {
+        throw new Error(`state baseline ${state.baseline || 'UNKNOWN'} != snapshot baseline ${index.baseline?.commit || 'UNKNOWN'}`);
+      }
+      const manifestCommit = federation.current_workbench_snapshot?.commit;
+      if (manifestCommit && manifestCommit !== state.baseline) {
+        throw new Error(`federation snapshot ${manifestCommit} != state baseline ${state.baseline}`);
+      }
+      D.stateTruth = {index, federation, state};
+      renderProductionState(state);
+      D.refreshLanguage();
+      document.dispatchEvent(new CustomEvent('dpwe:state-truth-ready', {detail: D.stateTruth}));
+    } catch (error) {
+      console.error('Production state truth unavailable', error);
+      renderProductionStateUnavailable(error);
+    }
+  }
+
   createProductionStateTruthPanel();
   markReferencePanels();
 
@@ -87,4 +208,6 @@
     });
     observer.observe(sidebar, {childList: true});
   }
+
+  initializeProductionStateTruth();
 })();
