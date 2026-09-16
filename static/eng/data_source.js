@@ -7,7 +7,6 @@
   const RESOURCE_PATHS = {
     index: 'index.json',
     federation: 'federation/source_manifest.json',
-    state: 'firmware/state_machine.json',
     ownership: 'architecture/ownership_matrix.json',
     scaling: 'firmware/scaling.json',
     protocol: 'protocol/host_protocol.json',
@@ -119,80 +118,6 @@
       <p class="note">${esc(federation.derived_view_rule)}</p>`;
   }
 
-  function renderProductionState(snapshot) {
-    const s = snapshot.state;
-    const panel = D.$('state-truth');
-    if (!panel) return;
-    if (!s || !Array.isArray(s.system_states)) {
-      renderProductionStateUnavailable(new Error('state snapshot missing SystemState vocabulary'));
-      return;
-    }
-
-    const modelBadge = D.$('stateTruthStatus');
-    if (modelBadge) {
-      modelBadge.classList.remove('danger');
-      modelBadge.textContent = 'SNAPSHOT VOCABULARY · PARTIAL TRANSITIONS';
-    }
-
-    const authority = D.$('prodAuthorityCards');
-    if (authority) {
-      const ownerRows = [
-        ['Snapshot SystemState owner', s.owner || 'CPU1', 'verified_source'],
-        ['Browser authority', 'read-only view', 'verified_source'],
-        ['Transition completeness', s.transition_completeness || 'partial', 'pending_verification']
-      ];
-      authority.innerHTML = ownerRows.map(([k,v,t]) =>
-        `<div class="card authority ${statusClass(t)}"><span>${esc(k)}</span><strong>${esc(v)}</strong><small>${esc(t)}</small></div>`).join('');
-    }
-
-    const graph = D.$('prodStateGraph');
-    if (graph) {
-      graph.innerHTML = (s.system_states || []).map(x =>
-        `<button type="button" class="state-node ${x.id === 'FAULT' ? 'fault-node' : ''}" data-prod-state="${esc(x.id)}"><span>${esc(x.id)}</span><small>${esc(x.value)}</small></button>`).join('');
-      graph.querySelectorAll('[data-prod-state]').forEach(button => button.addEventListener('click', () => {
-        const id = button.dataset.prodState;
-        const state = (s.system_states || []).find(x => x.id === id);
-        const detail = D.$('prodStateDetail');
-        if (detail) detail.innerHTML = `
-          <h3>${esc(id)}</h3>
-          <p><b>enum value:</b> ${esc(state?.value)}</p>
-          <p><b>snapshot owner:</b> ${esc(s.owner)}</p>
-          <p><b>trust within snapshot:</b> ${esc(s.trust)}</p>
-          <p class="note">Current live behavior must be checked against the Execution Plane exact SHA.</p>`;
-      }));
-    }
-
-    const transitions = D.$('prodTransitionList');
-    if (transitions) {
-      transitions.innerHTML = `
-        <div class="truth-boundary truth-pending"><strong>FAIL CLOSED</strong><span data-eng-zh="完整 transition/guard 未包含於此 pinned snapshot；只顯示已擷取且有 evidence 的 transition。" data-eng-en="The complete transition/guard table is not present in this pinned snapshot. Only extracted transitions with evidence are shown.">完整 transition/guard 未包含於此 pinned snapshot；只顯示已擷取且有 evidence 的 transition。</span></div>
-        ${(s.verified_transitions || []).map(t => `<div class="transition"><b>${esc(t.from)} → ${esc(t.to)}</b><span>${esc(t.guard)}</span><small>${esc(t.evidence)}</small></div>`).join('')}`;
-    }
-    const history = D.$('prodTransitionHistory');
-    if (history) history.innerHTML = `<p class="note">${esc((s.pending || []).join(' · '))}</p>`;
-  }
-
-  function renderProductionStateUnavailable(error) {
-    const panel = D.$('state-truth');
-    if (!panel) return;
-    const reason = error?.message || 'state snapshot unavailable';
-    const badge = D.$('stateTruthStatus');
-    if (badge) {
-      badge.classList.add('danger');
-      badge.textContent = 'STATE TRUTH UNAVAILABLE';
-    }
-    const authority = D.$('prodAuthorityCards');
-    if (authority) authority.innerHTML = `<div class="card authority truth-not-claimed"><span>Production state truth</span><strong>UNAVAILABLE</strong><small>fail-closed</small></div>`;
-    const graph = D.$('prodStateGraph');
-    if (graph) graph.innerHTML = `<div class="truth-boundary truth-not-claimed"><strong>FAIL CLOSED</strong><span>No reference state machine is substituted for missing production state truth.</span></div>`;
-    const detail = D.$('prodStateDetail');
-    if (detail) detail.innerHTML = `<p class="note">${esc(reason)}</p>`;
-    const transitions = D.$('prodTransitionList');
-    if (transitions) transitions.innerHTML = `<div class="truth-boundary truth-not-claimed"><strong>UNKNOWN</strong><span>Transition truth unavailable.</span></div>`;
-    const history = D.$('prodTransitionHistory');
-    if (history) history.innerHTML = '<p class="note">No production transition claim is made.</p>';
-  }
-
   function applyBoundaries(snapshot) {
     const analogPending = (snapshot.verification.scope || []).some(x =>
       x.item === 'ADC measurement scaling/calibration' && String(x.status).toUpperCase() === 'PENDING');
@@ -213,8 +138,7 @@
     try {
       const loaded = {};
       await Promise.all(Object.entries(RESOURCE_PATHS).map(async ([key,path]) => { loaded[key] = await loadJson(path); }));
-      if (loaded.index.baseline.commit !== loaded.state.baseline ||
-          loaded.index.baseline.commit !== loaded.verification.baseline) {
+      if (loaded.index.baseline.commit !== loaded.verification.baseline) {
         throw new Error('derived snapshot baseline mismatch');
       }
       if (loaded.federation.authoritative_engineering_truth !== false || loaded.index.authoritative_engineering_truth !== false) {
@@ -223,13 +147,11 @@
       D.truth = loaded;
       D.snapshot = loaded;
       renderTruthPanel(loaded);
-      renderProductionState(loaded);
       applyBoundaries(loaded);
       D.refreshLanguage();
       document.dispatchEvent(new CustomEvent('dpwe:truth-ready', {detail: loaded}));
     } catch (error) {
       console.error('Engineering snapshot layer unavailable', error);
-      renderProductionStateUnavailable(error);
       ['measurement','control','remote'].forEach(id =>
         addEvidenceBanner(id, 'PENDING', '工程快照載入失敗；依 fail-closed 規則，不宣告 current production truth 或 qualification。',
           'Engineering snapshot failed to load. Fail-closed policy: no current production truth or qualification is claimed.'));
