@@ -92,40 +92,27 @@ class FinalWorkbenchIntegrationTests(unittest.TestCase):
         ]:
             self.assertTrue((ROOT / retained_reader).is_file(), retained_reader)
 
-    def test_production_state_view_has_one_snapshot_truth_and_no_reference_fallback(self):
-        html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
-        app = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+    def test_production_state_truth_is_separate_from_reference_simulator(self):
+        loader = (ROOT / "static" / "eng" / "loader.js").read_text(encoding="utf-8")
+        state_truth_path = ROOT / "static" / "eng" / "state_truth.js"
+        self.assertTrue(state_truth_path.is_file(), "state_truth.js must own the production state shell")
+        state_truth = state_truth_path.read_text(encoding="utf-8")
         source = (ROOT / "static" / "eng" / "data_source.js").read_text(encoding="utf-8")
-        system_tools = (ROOT / "static" / "eng" / "system_tools.js").read_text(encoding="utf-8")
-        server_source = (ROOT / "server.py").read_text(encoding="utf-8")
-        state_panel = html.split('<section id="state"', 1)[1].split('<section id="remote"', 1)[0]
 
-        self.assertIn('id="stateTruthStatus"', state_panel)
-        self.assertNotIn('id="simState"', state_panel)
-        self.assertNotIn('data-i18n="state.simulator"', state_panel)
-        self.assertNotIn("STATE_MACHINE", app)
-        self.assertNotIn("loadStateMachine", app)
-        self.assertNotIn("/api/state-machine", app)
-        self.assertNotIn("/api/state-machine", server_source)
-        self.assertNotIn("get_state_machine", server_source)
-        self.assertFalse((ROOT / "workbench" / "state_machine.py").exists())
+        self.assertIn("./eng/state_truth.js", loader)
+        self.assertLess(loader.index("./eng/state_truth.js"), loader.index("./eng/data_source.js"))
+        self.assertIn("state-truth", state_truth)
+        self.assertIn("DEMO / REFERENCE", state_truth)
+        self.assertIn("REFERENCE MODEL", state_truth)
+        self.assertIn('data-panel="state"', state_truth)
+        self.assertIn('data-panel="contract"', state_truth)
+
+        self.assertIn("firmware/state_machine.json", source)
+        self.assertIn("D.$('state-truth')", source)
+        self.assertIn("prodStateGraph", source)
         self.assertIn("renderProductionStateUnavailable", source)
         self.assertIn("STATE TRUTH UNAVAILABLE", source)
-        self.assertNotIn("REF_CONTRACT", system_tools)
-
-    def test_state_machine_api_is_retired(self):
-        server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
-        thread = threading.Thread(target=server.serve_forever, daemon=True)
-        thread.start()
-        try:
-            host, port = server.server_address
-            with self.assertRaises(HTTPError) as ctx:
-                urlopen(f"http://{host}:{port}/api/state-machine", timeout=3)
-            self.assertEqual(ctx.exception.code, 404)
-        finally:
-            server.shutdown()
-            server.server_close()
-            thread.join(timeout=3)
+        self.assertNotIn("const panel = D.$('state');", source)
 
     def test_local_server_exposes_snapshot_data_and_blocks_traversal(self):
         server = ThreadingHTTPServer(("127.0.0.1", 0), WorkbenchHandler)
