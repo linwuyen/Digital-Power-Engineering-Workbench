@@ -1,53 +1,59 @@
 {
-  "schema_version": "1.0",
-  "dataset": "Workbench execution-plane convergence registry",
-  "policy": "Existing duplicated execution helpers are legacy compatibility only. New production execution capability belongs in linwuyen/ASR5K_v2_28384.",
+  "schema_version": "1.1",
+  "dataset": "Workbench execution-plane convergence and retirement registry",
+  "policy": "Production execution belongs in linwuyen/ASR5K_v2_28384. Workbench keeps only read/normalize/analyze/view capabilities plus explicitly frozen historical reference data.",
   "items": [
     {
       "path": "asrtest.ps1",
-      "status": "deprecated_execution_entrypoint",
+      "status": "deprecated_execution_entrypoint_stub",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "repository-owned build / qualification wrappers under tools/"
     },
     {
       "path": "asrtest.cmd",
-      "status": "deprecated_execution_entrypoint",
+      "status": "deprecated_execution_entrypoint_stub",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "repository-owned build / qualification wrappers under tools/"
     },
     {
+      "path": "tools/auto_common.py",
+      "status": "retired_removed_from_workbench",
+      "replacement_owner": "linwuyen/ASR5K_v2_28384",
+      "replacement": "execution-plane transaction / operator helpers"
+    },
+    {
       "path": "tools/ccs_build.py",
-      "status": "deprecated_duplicate_executor",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "tools/build_cpu1_headless.ps1, tools/build_m0_headless.ps1 and exact-head qualification wrappers"
     },
     {
       "path": "tools/hardware_bind.py",
-      "status": "deprecated_duplicate_executor",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "firmware repository toolchain / execution wrappers and local operator configuration"
     },
     {
       "path": "tools/hil_runner.py",
-      "status": "deprecated_duplicate_executor",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "tools/hil/ and ASR5K HIL Qualification workflow"
     },
     {
       "path": "tools/auto_run.py",
-      "status": "deprecated_duplicate_orchestrator",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "qualification transaction / HIL / build wrappers in execution plane"
     },
     {
       "path": "tools/auto_run_ext.py",
-      "status": "deprecated_duplicate_orchestrator",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "qualification transaction / HIL / build wrappers in execution plane"
     },
     {
       "path": "tools/evidence_agent.py",
-      "status": "deprecated_duplicate_evidence_capture",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
       "replacement": "execution transaction evidence and artifact manifests"
     },
