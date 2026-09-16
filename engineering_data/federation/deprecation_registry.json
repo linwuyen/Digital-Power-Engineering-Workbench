@@ -22,6 +22,18 @@
       "replacement": "execution-plane transaction / operator helpers"
     },
     {
+      "path": "config/auto_run.ci.json",
+      "status": "retired_removed_from_workbench",
+      "replacement_owner": "linwuyen/ASR5K_v2_28384",
+      "replacement": "execution-plane operator / qualification configuration"
+    },
+    {
+      "path": "config/auto_run.local.example.json",
+      "status": "retired_removed_from_workbench",
+      "replacement_owner": "linwuyen/ASR5K_v2_28384",
+      "replacement": "execution-plane local operator configuration"
+    },
+    {
       "path": "tools/ccs_build.py",
       "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
