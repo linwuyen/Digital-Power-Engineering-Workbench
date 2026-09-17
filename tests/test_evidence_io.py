@@ -126,6 +126,14 @@ class EvidenceIoTests(unittest.TestCase):
         self.assertNotIn("def _json(", source)
         self.assertIn("load_evidence_records", source)
 
+    def test_traceability_and_writer_share_read_only_ledger_reader(self):
+        traceability = (ROOT / "tools" / "traceability.py").read_text(encoding="utf-8")
+        writer = (ROOT / "tools" / "import_evidence.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("from import_evidence import read_ledger", traceability)
+        self.assertIn("workbench.evidence_io", traceability)
+        self.assertIn("workbench.evidence_io", writer)
+
 
 if __name__ == "__main__":
     unittest.main()
