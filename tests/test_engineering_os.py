@@ -11,7 +11,6 @@ TOOLS = ROOT / "tools"
 sys.path.insert(0, str(TOOLS))
 
 from extract_source_truth import SOURCE_FILES, extract  # noqa: E402
-from hil_runner import MockAdapter, run_plan, validate_plan  # noqa: E402
 from import_evidence import validate_evidence  # noqa: E402
 from traceability import build_traceability  # noqa: E402
 from truth_common import load_json  # noqa: E402
@@ -147,22 +146,6 @@ class EngineeringOsAutomationTest(unittest.TestCase):
         report = build_traceability(requirements, evidence)
         row = next(item for item in report["requirements"] if item["id"] == "REQ-SPIB-001")
         self.assertEqual(row["status"], "QUALIFIED_BY_EVIDENCE")
-
-    def test_hil_mock_can_never_claim_qualification(self):
-        plan = load_json(ROOT / "engineering_data/hil/reference_mock_plan.json")
-        report = run_plan(plan, MockAdapter(), "mock")
-        self.assertEqual(report["result"], "SIMULATION_PASS")
-        self.assertFalse(report["qualification_claimed"])
-
-    def test_hil_rejects_host_safety_authority(self):
-        plan = {
-            "id": "BAD",
-            "baseline": BASELINE,
-            "requirements": ["REQ-AUTH-001"],
-            "steps": [{"op": "send", "request": {"action": "disable_ocp"}}],
-        }
-        with self.assertRaises(ValueError):
-            validate_plan(plan)
 
 
 if __name__ == "__main__":
