@@ -6,6 +6,7 @@ from pathlib import Path
 from workbench.evidence_io import detail_row, load_evidence_records, read_ledger
 
 
+ROOT = Path(__file__).resolve().parents[1]
 SHA = "a" * 40
 GOLDEN = "b" * 40
 
@@ -117,6 +118,13 @@ class EvidenceIoTests(unittest.TestCase):
             path.write_text('{"record_type":"ledger_meta"}\n[]\n', encoding="utf-8")
             with self.assertRaises(ValueError):
                 read_ledger(path)
+
+    def test_status_consumer_uses_shared_adapter_instead_of_raw_readers(self):
+        source = (ROOT / "workbench" / "status_evidence.py").read_text(encoding="utf-8")
+        self.assertIn("from .evidence_io import", source)
+        self.assertNotIn("def read_jsonl(", source)
+        self.assertNotIn("def _json(", source)
+        self.assertIn("load_evidence_records", source)
 
 
 if __name__ == "__main__":
