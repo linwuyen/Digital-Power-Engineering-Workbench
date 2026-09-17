@@ -20,40 +20,6 @@ function assertPositive(name, value) {
   return value;
 }
 
-const STATE_MACHINE = {
-  states: [
-    {id:'BOOT', pwm:'OFF', authority:['hardware reset'], entry:['POR / reset'], exit:['clock + memory init complete']},
-    {id:'INIT', pwm:'OFF', authority:['firmware init'], entry:['BOOT complete'], exit:['self-check pass']},
-    {id:'STANDBY', pwm:'OFF', authority:['host setpoints','protection'], entry:['self-check pass','STOP complete'], exit:['OUTPUT_ON accepted']},
-    {id:'PRECHARGE', pwm:'OFF', authority:['sequencer','protection'], entry:['OUTPUT_ON','no latched fault'], exit:['bus ready']},
-    {id:'SOFT_START', pwm:'CONTROLLED', authority:['slew generator','control loop','protection'], entry:['bus ready'], exit:['reference reached']},
-    {id:'RUN', pwm:'ON', authority:['control loop','host bounded setpoints','hardware protection'], entry:['soft-start complete'], exit:['OUTPUT_OFF','fault']},
-    {id:'STOP', pwm:'RAMP/OFF', authority:['sequencer','protection'], entry:['OUTPUT_OFF'], exit:['energy discharge complete']},
-    {id:'FAULT', pwm:'TRIPPED', authority:['hardware trip','protection latch'], entry:['OVP/OCP/OTP/interlock'], exit:['fault clear policy satisfied']}
-  ],
-  transitions: [
-    {from:'BOOT',to:'INIT',event:'BOOT_DONE'},
-    {from:'INIT',to:'STANDBY',event:'SELF_CHECK_PASS'},
-    {from:'INIT',to:'FAULT',event:'SELF_CHECK_FAIL'},
-    {from:'STANDBY',to:'PRECHARGE',event:'OUTPUT_ON'},
-    {from:'PRECHARGE',to:'SOFT_START',event:'BUS_READY'},
-    {from:'SOFT_START',to:'RUN',event:'REFERENCE_REACHED'},
-    {from:'RUN',to:'STOP',event:'OUTPUT_OFF'},
-    {from:'STOP',to:'STANDBY',event:'DISCHARGE_DONE'},
-    {from:'PRECHARGE',to:'FAULT',event:'PROTECTION'},
-    {from:'SOFT_START',to:'FAULT',event:'PROTECTION'},
-    {from:'RUN',to:'FAULT',event:'PROTECTION'},
-    {from:'FAULT',to:'STANDBY',event:'CLEAR_FAULT'}
-  ],
-  authority_boundaries: {
-    web_ui:'Operator intent only; never safety authority.',
-    host:'May request bounded setpoints and state transitions.',
-    firmware:'Validates commands, owns sequencing and state policy.',
-    control_loop:'Owns deterministic regulation execution.',
-    hardware_protection:'Highest shutdown authority; must not depend on web/network availability.'
-  }
-};
-
 function localSignalChain(p) {
   const physical = assertFinite('physical_value', p.physical_value);
   const sensorGain = assertFinite('sensor_gain_v_per_unit', p.sensor_gain_v_per_unit);
@@ -288,27 +254,6 @@ $('controlForm').addEventListener('submit', async (e) => {
 });
 
 function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-let stateMachine=STATE_MACHINE,simulatorState='STANDBY',history=[];
-async function loadStateMachine(){
-  if(backendAvailable){try{stateMachine=await backendApi('/api/state-machine');}catch{stateMachine=STATE_MACHINE;}}
-  $('authorityCards').innerHTML=Object.entries(stateMachine.authority_boundaries).map(([k,v])=>`<div><b>${escapeHtml(k.replaceAll('_',' '))}</b><span>${escapeHtml(v)}</span></div>`).join('');
-  $('stateGraph').innerHTML=stateMachine.states.map((s,i)=>`${i?'<span class="state-arrow">→</span>':''}<button class="state-node" data-state="${s.id}"><b>${s.id}</b><small>${s.pwm}</small></button>`).join('');
-  document.querySelectorAll('.state-node').forEach(btn=>btn.addEventListener('click',()=>selectState(btn.dataset.state)));
-  selectState('RUN');renderSimulator();
-}
-function selectState(id){
-  document.querySelectorAll('.state-node').forEach(x=>x.classList.toggle('selected',x.dataset.state===id));
-  const s=stateMachine.states.find(x=>x.id===id), outgoing=stateMachine.transitions.filter(x=>x.from===id);
-  $('stateDetail').innerHTML=`<b>${escapeHtml(s.id)}</b><p>PWM: ${escapeHtml(s.pwm)}</p><strong>Control authority</strong><ul>${s.authority.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul><strong>Entry</strong><ul>${s.entry.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul><strong>Exit</strong><ul>${s.exit.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul><p class="note">Outgoing policy events: ${outgoing.map(x=>escapeHtml(x.event)).join(', ')||'none'}</p>`;
-}
-function renderSimulator(){
-  $('simState').textContent=simulatorState;
-  const outgoing=stateMachine.transitions.filter(x=>x.from===simulatorState);
-  $('transitionList').innerHTML=outgoing.map((x,i)=>`<button class="transition-action" data-index="${i}"><b>${escapeHtml(x.event)}</b><span>${escapeHtml(x.from)} → ${escapeHtml(x.to)}</span></button>`).join('')||'<div>No outgoing transitions.</div>';
-  document.querySelectorAll('.transition-action').forEach((btn,i)=>btn.onclick=()=>applyTransition(outgoing[i]));
-  $('transitionHistory').innerHTML=history.length?history.slice(-6).reverse().map(x=>`<div><span>${escapeHtml(x.event)}</span><b>${escapeHtml(x.from)} → ${escapeHtml(x.to)}</b></div>`).join(''):'<div class="history-empty">No simulated transitions yet.</div>';
-}
-function applyTransition(t){history.push(t);simulatorState=t.to;selectState(t.to);renderSimulator();}
 
 const commandEntries=[];
 function logCommand(action,result,error=false){commandEntries.push({time:new Date().toLocaleTimeString(),action,result,error});$('commandLog').innerHTML=commandEntries.slice(-7).reverse().map(x=>`<div class="log-row ${x.error?'bad':''}"><span>${escapeHtml(x.time)}</span><b>${escapeHtml(x.action)}</b><em>${escapeHtml(x.result)}</em></div>`).join('');}
@@ -337,7 +282,6 @@ async function detectRuntime(){
 
 (async function init(){
   await detectRuntime();
-  await loadStateMachine();
   $('measurementForm').requestSubmit();
   $('controlForm').requestSubmit();
   await pollTelemetry();
