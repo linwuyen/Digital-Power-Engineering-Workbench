@@ -2,11 +2,25 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from import_evidence import read_ledger
-from truth_common import load_json, write_json
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from workbench.evidence_io import load_evidence_records  # noqa: E402
+from truth_common import load_json, write_json  # noqa: E402
+
+
+def _evidence_identity(row: dict) -> str:
+    return str(
+        row.get("evidence_id")
+        or row.get("evidence")
+        or (f"{row.get('source')}:{row.get('run_id')}" if row.get("run_id") else row.get("source"))
+        or "UNKNOWN_EVIDENCE"
+    )
 
 
 def build_traceability(requirements: dict, evidence_rows: list[dict]) -> dict:
@@ -16,18 +30,16 @@ def build_traceability(requirements: dict, evidence_rows: list[dict]) -> dict:
     orphan_refs: list[dict] = []
 
     for evidence in evidence_rows:
-        if evidence.get("record_type") != "evidence":
-            continue
         for requirement_id in evidence.get("requirement_ids", []):
             if requirement_id not in known_requirements:
-                orphan_refs.append({"evidence_id": evidence.get("evidence_id"), "requirement_id": requirement_id})
+                orphan_refs.append({"evidence_id": _evidence_identity(evidence), "requirement_id": requirement_id})
                 continue
             evidence_by_requirement[requirement_id].append(evidence)
 
     rows = []
     for requirement in requirements["requirements"]:
         linked = evidence_by_requirement.get(requirement["id"], [])
-        exact = [row for row in linked if row.get("baseline") == baseline]
+        exact = [row for row in linked if row.get("execution_sha") == baseline]
         pass_rows = [row for row in exact if row.get("result") == "PASS"]
         fail_rows = [row for row in exact if row.get("result") == "FAIL"]
 
@@ -51,8 +63,12 @@ def build_traceability(requirements: dict, evidence_rows: list[dict]) -> dict:
             "status": status,
             "implementation_refs": requirement.get("implementation_refs", []),
             "verification_refs": requirement.get("verification_refs", []),
-            "evidence_ids": [row["evidence_id"] for row in exact],
-            "stale_or_other_baseline_evidence_ids": [row["evidence_id"] for row in linked if row.get("baseline") != baseline],
+            "evidence_ids": [_evidence_identity(row) for row in exact],
+            "stale_or_other_baseline_evidence_ids": [
+                _evidence_identity(row)
+                for row in linked
+                if row.get("execution_sha") != baseline
+            ],
         })
 
     counts = Counter(row["status"] for row in rows)
@@ -83,14 +99,14 @@ def markdown(report: dict) -> str:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Resolve requirement qualification from the canonical evidence ledger.")
+    parser = argparse.ArgumentParser(description="Resolve requirement qualification from normalized engineering evidence.")
     parser.add_argument("--requirements", default="engineering_data/requirements/requirement_ledger.json")
-    parser.add_argument("--ledger", default="engineering_data/evidence/evidence_ledger.jsonl")
+    parser.add_argument("--data-root", default="engineering_data")
     parser.add_argument("--out")
     parser.add_argument("--markdown")
     args = parser.parse_args()
 
-    report = build_traceability(load_json(args.requirements), read_ledger(args.ledger))
+    report = build_traceability(load_json(args.requirements), load_evidence_records(args.data_root))
     if args.out:
         write_json(args.out, report)
     if args.markdown:

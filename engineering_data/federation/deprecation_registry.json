@@ -71,9 +71,9 @@
     },
     {
       "path": "tools/import_evidence.py",
-      "status": "frozen_legacy_snapshot_writer",
+      "status": "retired_removed_from_workbench",
       "replacement_owner": "linwuyen/ASR5K_v2_28384",
-      "replacement": "machine-readable execution evidence emitted by exact execution transaction"
+      "replacement": "execution-plane evidence emission; Workbench read/validation helpers now live in workbench/evidence_io.py"
     },
     {
       "path": "engineering_data/automation/",
