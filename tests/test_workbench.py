@@ -4,7 +4,6 @@ import unittest
 from workbench.control import BuckPlantConfig, analyze_buck_pi, pi_tustin
 from workbench.measurement import SignalChainConfig, physical_to_adc
 from workbench.remote import RemoteCommandError, SafeMockPowerSupply
-from workbench.state_machine import get_state_machine
 
 
 class MeasurementTests(unittest.TestCase):
@@ -81,14 +80,6 @@ class RemoteSafetyTests(unittest.TestCase):
         with self.assertRaises(RemoteCommandError):
             psu.command("output_on")
         self.assertFalse(psu.telemetry()["output_enabled"])
-
-
-class StateMachineTests(unittest.TestCase):
-    def test_run_has_protection_transition_to_fault(self):
-        sm = get_state_machine()
-        transitions = {(x["from"], x["to"], x["event"]) for x in sm["transitions"]}
-        self.assertIn(("RUN", "FAULT", "PROTECTION"), transitions)
-        self.assertIn("hardware_protection", sm["authority_boundaries"])
 
 
 if __name__ == "__main__":

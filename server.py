@@ -14,7 +14,6 @@ from workbench.profiles import ProfileError, builtin_profiles, profile_from_dict
 from workbench.protocol import ProtocolError, Frame, bytes_to_hex, decode_frame, hex_to_bytes
 from workbench.remote import RemoteCommandError, SafeMockPowerSupply
 from workbench.sfra import SfraError, compare_theory_to_sfra, parse_sfra_csv
-from workbench.state_machine import get_state_machine
 from workbench.status_service import build_live_evidence, build_live_status
 from workbench.validation import ValidationError, run_sequence
 
@@ -98,8 +97,6 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             return self._json(200, build_live_evidence(agent, firmware, ENGINEERING_DATA))
         if route == "/api/health":
             return self._json(200, {"ok": True, "service": "digital-power-engineering-workbench", "version": "1.0-engineering"})
-        if route == "/api/state-machine":
-            return self._json(200, get_state_machine())
         if route == "/api/profiles":
             return self._json(200, {"profiles": builtin_profiles()})
         if route == "/api/remote/telemetry":

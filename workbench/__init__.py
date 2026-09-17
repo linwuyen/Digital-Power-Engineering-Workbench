@@ -6,7 +6,6 @@ from .profiles import builtin_profiles, profile_from_dict
 from .protocol import Frame, crc16_ccitt, decode_frame
 from .remote import SafeMockPowerSupply
 from .sfra import parse_sfra_csv, compare_theory_to_sfra
-from .state_machine import get_state_machine
 from .validation import run_sequence
 
 __all__ = [
@@ -15,5 +14,5 @@ __all__ = [
     "PlantModel", "PoleZeroController", "analyze_pole_zero_loop",
     "validate_state_contract", "builtin_profiles", "profile_from_dict",
     "Frame", "crc16_ccitt", "decode_frame", "SafeMockPowerSupply",
-    "parse_sfra_csv", "compare_theory_to_sfra", "get_state_machine", "run_sequence",
+    "parse_sfra_csv", "compare_theory_to_sfra", "run_sequence",
 ]
