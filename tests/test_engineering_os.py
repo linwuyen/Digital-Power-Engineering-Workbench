@@ -11,10 +11,10 @@ TOOLS = ROOT / "tools"
 sys.path.insert(0, str(TOOLS))
 
 from extract_source_truth import SOURCE_FILES, extract  # noqa: E402
-from import_evidence import validate_evidence  # noqa: E402
 from traceability import build_traceability  # noqa: E402
 from truth_common import load_json  # noqa: E402
 from verify_truth_drift import compare  # noqa: E402
+from workbench.evidence_io import validate_evidence  # noqa: E402
 
 
 BASELINE = "2b72f50648d86c11547645882248eed69f12892f"
@@ -137,11 +137,17 @@ class EngineeringOsAutomationTest(unittest.TestCase):
         row = next(item for item in empty["requirements"] if item["id"] == "REQ-SPIB-001")
         self.assertEqual(row["status"], "SOURCE_VERIFIED_ONLY")
         evidence = [{
-            "record_type": "evidence",
-            "evidence_id": "EVD-1",
-            "baseline": BASELINE,
+            "source": "evidence_ledger",
+            "execution_sha": BASELINE,
+            "gate": "regression",
             "result": "PASS",
+            "evidence_id": "EVD-1",
+            "evidence": "EVD-1",
+            "timestamp": "2026-08-31T00:00:00Z",
+            "golden_sha": None,
             "requirement_ids": ["REQ-SPIB-001"],
+            "run_id": "RUN-1",
+            "details": {},
         }]
         report = build_traceability(requirements, evidence)
         row = next(item for item in report["requirements"] if item["id"] == "REQ-SPIB-001")
