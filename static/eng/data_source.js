@@ -170,6 +170,31 @@
     if (history) history.innerHTML = `<p class="note">${esc((s.pending || []).join(' · '))}</p>`;
   }
 
+  function renderProductionStateUnavailable(reason) {
+    const panel = D.$('state');
+    if (!panel) return;
+
+    const modelBadge = panel.querySelector('.panel-head .badge');
+    if (modelBadge) {
+      modelBadge.classList.add('danger');
+      modelBadge.textContent = 'STATE VIEW UNAVAILABLE';
+    }
+
+    const safeReason = esc(reason || 'engineering state truth unavailable');
+    const authority = D.$('authorityCards');
+    if (authority) authority.innerHTML = '<div class="card authority truth-not-claimed"><span>Production State</span><strong>UNAVAILABLE</strong><small>No reference fallback permitted.</small></div>';
+    const graph = D.$('stateGraph');
+    if (graph) graph.innerHTML = '<div class="truth-boundary truth-not-claimed"><strong>STATE VIEW UNAVAILABLE</strong><span>Production state truth could not be loaded. Reference simulator data is intentionally not substituted.</span></div>';
+    const detail = D.$('stateDetail');
+    if (detail) detail.innerHTML = `<h3>Production state unavailable</h3><p class="note">${safeReason}</p>`;
+    const sim = D.$('simState');
+    if (sim) sim.textContent = 'DISABLED · NO TRUTH SOURCE';
+    const transitions = D.$('transitionList');
+    if (transitions) transitions.innerHTML = '';
+    const history = D.$('transitionHistory');
+    if (history) history.innerHTML = '<p class="note">No production transition history is shown without an evidence-bound state source.</p>';
+  }
+
   function applyBoundaries(snapshot) {
     const analogPending = (snapshot.verification.scope || []).some(x =>
       x.item === 'ADC measurement scaling/calibration' && String(x.status).toUpperCase() === 'PENDING');
@@ -206,6 +231,7 @@
       document.dispatchEvent(new CustomEvent('dpwe:truth-ready', {detail: loaded}));
     } catch (error) {
       console.error('Engineering snapshot layer unavailable', error);
+      renderProductionStateUnavailable(error.message);
       ['measurement','control','state','remote'].forEach(id =>
         addEvidenceBanner(id, 'PENDING', '工程快照載入失敗；依 fail-closed 規則，不宣告 current production truth 或 qualification。',
           'Engineering snapshot failed to load. Fail-closed policy: no current production truth or qualification is claimed.'));
