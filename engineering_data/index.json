@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "dataset": "ASR5K derived engineering snapshot index",
   "generated_utc": "2026-09-07T01:30:00+08:00",
   "role": "view_analysis_plane_snapshot",
@@ -69,18 +69,17 @@
     "triple_build_plan": "automation/plans/triple_build.json"
   },
   "automation": {
-    "status": "legacy_compatibility_deprecated_for_execution_authority",
-    "policy": "Do not add new production build/flash/HIL/qualification execution here. Execution ownership is ASR5K_v2_28384.",
+    "status": "execution_helpers_retired_view_only",
+    "policy": "Workbench does not own production build, flash, HIL or qualification execution. Those capabilities belong to ASR5K_v2_28384. Checked-in automation/HIL datasets are frozen historical reference data only.",
     "source_truth_extractor": "../tools/extract_source_truth.py",
     "drift_detector": "../tools/verify_truth_drift.py",
     "evidence_importer": "../tools/import_evidence.py",
     "traceability_engine": "../tools/traceability.py",
-    "hil_runner": "../tools/hil_runner.py",
-    "full_auto_orchestrator": "../tools/auto_run_ext.py",
-    "base_orchestrator": "../tools/auto_run.py",
-    "evidence_agent": "../tools/evidence_agent.py",
-    "hardware_binder": "../tools/hardware_bind.py",
-    "ccs_build_adapter": "../tools/ccs_build.py",
+    "status_snapshot_generator": "../tools/generate_status_snapshot.py",
+    "federation_validator": "../tools/validate_federation.py",
+    "historical_automation_contracts": "automation/",
+    "historical_hil_reference": "hil/",
+    "execution_owner": "linwuyen/ASR5K_v2_28384",
     "operator_entrypoint_windows": "../asrtest.ps1"
   },
   "human_views": {

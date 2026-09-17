@@ -1,77 +1,65 @@
-# ASR5K Local Hardware Binding
+# ASR5K Local Hardware Binding — Historical Reference
 
-This layer removes the remaining hand-edited build binding from the normal operator flow.
+## Status
 
-## One-time command
+The Workbench-owned hardware binder is **retired** as of 2026-09-16.
 
-From the Workbench repository on Windows:
+Target discovery, CCS/toolchain binding, flash configuration, physical HIL gateway binding and operator authorization belong to the Execution Plane:
 
-```powershell
-.\asrtest.ps1 init
-.\asrtest.ps1 bind
-.\asrtest.ps1 doctor
+```text
+linwuyen/ASR5K_v2_28384
 ```
 
-`bind` does not enable physical hardware. It only discovers and verifies local prerequisites.
+`Digital-Power-Engineering-Workbench` is the View / Analysis Plane and no longer ships `tools/hardware_bind.py` or `tools/ccs_build.py`.
 
-## What `bind` discovers automatically
+## Historical contract retained for analysis
 
-The binder checks, in order:
+`engineering_data/automation/asr5k_build_contract.json` remains checked in as a frozen historical snapshot bound to:
 
-1. Exact ASR5K production checkout, including the canonical SHA.
-2. CCS command-line executable (`eclipsec` or `ccs-server-cli`).
-3. Local project metadata against the exact-baseline build contract.
-4. Optional DSLite / UniFlash executable.
-5. An unambiguous `.ccxml` target configuration if one exists.
-6. Optional process-JSONL HIL gateway only when explicitly supplied.
-7. Scope / SFRA / logic / log export folders.
+```text
+repository: linwuyen/ASR5K_v2_28384
+branch:     feat/voltage-slew-runtime-complete
+commit:     2b72f50648d86c11547645882248eed69f12892f
+```
 
-The resulting local report is `.engineering_local/binding.json`; the operational config is `.engineering_local/auto_run.json`. Both are Git-ignored.
+The snapshot records the historical project/configuration/toolchain identities:
 
-## Optional explicit overrides
-
-No environment variables are required when normal paths are discoverable. These are optional locators only; they do not upgrade trust:
-
-`ASR5K_REPO`, `CCS_CLI`, `CCS_ROOT`, `DSLITE`, `ASR_CCXML`, `ASR_GATEWAY_COMMAND`, `ASR_SCOPE_EXPORT`, `ASR_SFRA_EXPORT`, `ASR_LOGIC_EXPORT`, `ASR_LOG_EXPORT`.
-
-## Exact build contract
-
-`engineering_data/automation/asr5k_build_contract.json` is bound to `linwuyen/ASR5K_v2_28384`, branch `feat/voltage-slew-runtime-complete`, exact SHA `2b72f50648d86c11547645882248eed69f12892f`.
-
-| ID | CCS project | Configuration | Compiler | Exact artifact name |
+| ID | CCS project | Configuration | Compiler | Historical artifact name |
 |---|---|---|---|---|
 | cpu1 | ASR5K_F28384D_CPU1 | FLASH | 22.6.1.LTS | ASR5K_F28384D_CPU1.out |
 | cpu2 | ASR5K_F28384D_CPU2 | FLASH | 22.6.1.LTS | ASR5K_F28384D_CPU2.out |
 | m0 | ASR5K_M0G3519 | Debug | TICLANG_3.2.2.LTS | ASR5K_M0G3519.out |
 
-The `.out` name comes from CCS metadata (`artifactName=${ProjName}`, `artifactExtension=out`), not a guessed filename.
+These values are historical/reference data. Current build or target identity must be re-queried from the Execution Plane and its exact source/toolchain evidence.
 
-## Build plans
+## View-plane boundary
 
-After `bind` reports `BUILD_BINDING=READY`:
+Workbench may display or compare:
 
-```powershell
-.\asrtest.ps1 doctor ASR5K-CPU1-BUILD-001
-.\asrtest.ps1 run ASR5K-CPU1-BUILD-001
-.\asrtest.ps1 run ASR5K-CPU2-BUILD-001
-.\asrtest.ps1 run ASR5K-M0-BUILD-001
-.\asrtest.ps1 run ASR5K-TRIPLE-BUILD-001
+- exact firmware SHA;
+- artifact identities/hashes emitted by the Execution Plane;
+- flash / board / HIL / protection evidence;
+- target and toolchain provenance;
+- missing, stale or conflicting bindings.
+
+Workbench must not discover a local target and then treat that discovery as permission to flash or drive hardware.
+
+In particular:
+
+```text
+tool found        != tool approved
+target found      != target authoritative
+artifact exists   != artifact flashed
+flash success     != board PASS
+board response    != protection qualification
 ```
 
-Each plan performs exact SHA / clean-tree preflight, CCS CLI capability probe, fresh per-run workspace, exact project import, full build of the exact configuration, exact `.out` requirement, SHA-256 archive, evidence-ledger append and traceability refresh. A CCS return code without a fresh `.out` is not PASS.
+## Safety and deterministic timing
 
-## Build mode vs hardware mode
+Hardware binding is outside the deterministic control/protection path. Moving binding ownership out of Workbench does not change C2000/MSPM0 ISR execution, PWM timing, control-loop timing or fault latency.
 
-`build` mode is separate from `hardware`: it does not require `allow_hardware=true`, cannot run HIL, cannot execute `hardware=true` commands, cannot wait for physical collectors and cannot satisfy `physical_evidence_required`. A build can qualify a build requirement only; it cannot qualify board behavior, fault latency, SFRA or HIL.
+OVP/OCP/OTP, PWM Trip, interlock and emergency safe-off remain local firmware/hardware authority and must never depend on browser, Workbench or network availability.
 
-## Flash binding
+## Migration
 
-Flash is intentionally not guessed. The exact source baseline does not establish one canonical `.ccxml` or production flash command. `bind` may discover DSLite and a `.ccxml`, but flash becomes `READY` only when the target configuration is unambiguous. Otherwise it reports `FLASH_BINDING=PENDING` and generates no guessed flash action.
-
-## HIL gateway binding
-
-The existing process JSONL adapter is a harness contract, not the production AM3352 ↔ CPU1 SPIB framing implementation. A gateway becomes ready only when a real local command is supplied, for example through `ASR_GATEWAY_COMMAND`. Until then the binder reports `HIL_GATEWAY_BINDING=PENDING`.
-
-## Hardware enable
-
-The binder never changes `allow_hardware` from false to true. Physical flash/HIL/fixture control requires explicit local operator enable after detected paths are reviewed. This preserves the boundary between discovery and authority to touch hardware.
+The root `asrtest.ps1` / `asrtest.cmd` files are retained only as migration stubs. They point operators toward repository-owned exact-head build / qualification tools in `ASR5K_v2_28384` and intentionally do not invoke a Workbench hardware binder.
