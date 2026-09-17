@@ -27,7 +27,7 @@ class EngineeringMemorySsotTest(unittest.TestCase):
             with self.subTest(key=key):
                 self.assertEqual(index["resources"][key], relative)
                 self.assertTrue((DATA / relative).is_file())
-        self.assertTrue(index["consumer_policy"]["pass_claim_requires_evidence_ledger_record"])
+        self.assertTrue(index["consumer_policy"]["pass_claim_requires_exact_evidence_reference"])
         self.assertFalse(index["consumer_policy"]["test_file_presence_is_pass"])
         self.assertFalse(index["authoritative_engineering_truth"])
         self.assertEqual(index["role"], "view_analysis_plane_snapshot")
