@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="面向嵌入式与电源工程师的 C2000 数字电源调试 Lab：用 4 个免费互动实验理解 Buck、ADC、控制时序与故障定位。">
+  <title>数字电源固件调试 Lab — C2000 Buck Edition</title>
+  <link rel="stylesheet" href="../community.css">
+</head>
+<body>
+<header class="top"><div class="shell">
+  <a class="brand" href="../../../">Digital Power Engineering Workbench</a>
+  <nav aria-label="页面导航">
+    <a href="#preview">免费 Preview</a>
+    <a href="#paid">完整 Lab</a>
+    <a href="../">繁中</a>
+    <a href="../en/">EN</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="shell">
+  <p class="eyebrow">FREE COMMUNITY EDITION · C2000 BUCK</p>
+  <h1>会写 C，不代表会调数字电源。</h1>
+  <p class="lead">真正难的不是单独学会 ADC 或 ePWM，而是系统出问题时，能不能判断故障到底在功率级、采样链、ISR 时序、控制器、PWM 更新还是硬件保护。这个 Lab 用一台 Buck 把整条链真正串起来。</p>
+  <div class="actions">
+    <a class="button primary" href="#preview">先做 4 个免费实验</a>
+    <a class="button" data-buy aria-disabled="true">Early Access · NT$690 一次性购买</a>
+  </div>
+  <p class="note">免费版让你判断这套方法是否适合你；完整版本训练“现象 → 假设 → 测量 → 反证 → 修正”。</p>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">TARGET OUTCOME</p>
+  <h2>最后要得到的不是寄存器记忆，而是真正能用于调试的 mental model。</h2>
+  <div class="grid">
+    <article class="card"><h3>到底是哪一层错了？</h3><p>分清 physical V/I、AFE/分压、ADC pin、counts 与 reconstructed feedback，不把所有问题都先怪到 PI。</p></article>
+    <article class="card"><h3>控制命令什么时候真正生效？</h3><p>把 PWM trigger → ADC conversion → ISR/CLA → shadow write → load event 看成一条 deterministic timing chain。</p></article>
+    <article class="card"><h3>下一步该测什么？</h3><p>先选信息量最高的 measurement，再改代码，让调试过程可以被反证，而不是靠猜。</p></article>
+    <article class="card"><h3>最终谁拥有 PWM 权限？</h3><p>分清软件允许条件与 CMPSS / Trip Zone 等独立硬件 veto path 的职责。</p></article>
+  </div>
+</div></section>
+
+<section class="block" id="preview"><div class="shell">
+  <p class="eyebrow">PREVIEW 1 · PHYSICS</p>
+  <h2>只改变 L，电感电流 ripple 会怎么变？</h2>
+  <div class="grid">
+    <article class="card control">
+      <label for="inductance">Inductance</label>
+      <input id="inductance" type="range" min="100" max="600" step="25" value="200">
+      <div id="physics-result" class="result" aria-live="polite"></div>
+    </article>
+    <article class="card"><h3>先抓方向，再抓公式。</h3><p>48 → 12 V、100 kHz、理想 CCM。L 增大，电流 ripple 下降。这里只回答 physical energy-flow 问题，并不等于 closed-loop performance 已经正确。</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 2 · SENSING</p>
+  <h2>物理电压进入 MCU 后，早已不是同一个数字。</h2>
+  <div class="grid">
+    <article class="card control">
+      <label for="sense-vout">Vout（V）</label>
+      <input id="sense-vout" type="number" min="1" max="16" step=".1" value="12">
+      <div id="sense-result" class="result" aria-live="polite"></div>
+    </article>
+    <article class="card"><h3>Signal chain</h3><p>这个 preview 固定使用 82 kΩ / 20 kΩ divider、3.3 V reference、12-bit ADC。真实调试时必须分清 physical Vout、ADC pin voltage、counts 与 reconstructed feedback。</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 3 · TIMING</p>
+  <h2>哪一种事件顺序才合理？</h2>
+  <div class="grid">
+    <article class="card options">
+      <button data-timing="wrong">ISR → PWM SOCA → ADC sample → shadow write</button>
+      <button data-timing="correct">PWM SOCA → ADC sample/convert → ISR/CLA → shadow write → load event</button>
+      <button data-timing="wrong">ADC sample → active PWM 立即改变 → ISR → PI</button>
+    </article>
+    <article class="card"><div id="timing-result" class="result" aria-live="polite">先选一个事件顺序。</div><p class="note">免费版只验证 timing grammar；完整 Lab 才继续处理 delay budget、shadow-load commit 与 sample→actuate evidence。</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 4 · UNKNOWN FAULT</p>
+  <h2>DMM 是 12 V，但固件重建只有 9.6 V。下一步测什么？</h2>
+  <div class="grid">
+    <article class="card options">
+      <button data-fault="pi">先把 PI Kp 调大</button>
+      <button data-fault="adc">先测 ADC pin，核对 divider / scaling / counts</button>
+      <button data-fault="pwm">先提高 switching frequency</button>
+    </article>
+    <article class="card"><div id="fault-result" class="result" aria-live="polite">选择你认为信息量最高的下一步。</div><p class="note">这里只公开 1 个 challenge。完整版本才包含跨 sensing / timing / ownership / safety / control 的 fault bank。</p></article>
+  </div>
+</div></section>
+
+<section class="block" id="paid"><div class="shell">
+  <p class="eyebrow">PAID LAB · EARLY ACCESS RELEASE 1</p>
+  <h2>免费版看方法；完整版本把整条工程链练完。</h2>
+  <div class="grid">
+    <article class="card locked">
+      <h3>完整版本包含</h3>
+      <ul>
+        <li>01 Power Physics</li><li>02 Sensing</li><li>03 Feedback</li><li>04 Timing</li>
+        <li>05 Dynamics</li><li>06 Safety</li><li>07 Production Firmware</li><li>08 Evidence</li>
+        <li>完整 fault bank</li><li>guided workbook</li><li>answer key</li><li>debug checklist</li>
+      </ul>
+    </article>
+    <article class="card">
+      <p class="eyebrow">EARLY ACCESS RELEASE 1</p>
+      <div class="price">NT$690</div>
+      <p>一次性购买。下载完整 interactive lab bundle、Workbook、Answer Key、fault scenarios 与 evidence-driven debug checklist。</p>
+      <div class="actions"><a class="button primary" data-buy aria-disabled="true">获取 Early Access</a></div>
+      <p id="checkout-status" class="status" hidden></p>
+      <p class="note"><strong>支持边界：</strong>NT$690 不包含个人项目调试、原理图 review、1-on-1 consulting 或替你的 target board 做 qualification。</p>
+    </article>
+  </div>
+  <p class="truth">这是训练产品。完成 Lab 不代表 production qualification、BOARD_PASS、硬件认证或安全认证；真实 target/board 结论仍需要对应 evidence。</p>
+</div></section>
+</main>
+
+<footer><div class="shell">Community Edition 只公开少量 preview；完整训练路径通过付费 Early Access 独立交付。</div></footer>
+<script src="../product-config.js"></script>
+<script src="../localized-app.js"></script>
+</body>
+</html>

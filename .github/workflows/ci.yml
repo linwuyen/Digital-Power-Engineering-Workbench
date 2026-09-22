@@ -83,4 +83,5 @@ jobs:
           node --check static/eng/control_sfra.js
           node --check static/eng/system_tools.js
           node --check training/digital-buck/app.js
+          node --check training/digital-buck/localized-app.js
           node --check training/digital-buck/product-config.js
