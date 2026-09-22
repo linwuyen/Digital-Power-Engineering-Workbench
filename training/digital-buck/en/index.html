@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A free 4-experiment preview for embedded engineers learning how to debug a C2000 digital-power control loop.">
+  <title>Digital Power Firmware Debug Lab — C2000 Buck Edition</title>
+  <link rel="stylesheet" href="../community.css">
+</head>
+<body>
+<header class="top"><div class="shell">
+  <a class="brand" href="../../../">Digital Power Engineering Workbench</a>
+  <nav aria-label="Page navigation">
+    <a href="#preview">Free Preview</a>
+    <a href="#paid">Full Lab</a>
+    <a href="../">繁中</a>
+    <a href="../zh-cn/">简中</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="shell">
+  <p class="eyebrow">FREE COMMUNITY EDITION · C2000 BUCK</p>
+  <h1>Debug the whole digital-power loop, not just one peripheral at a time.</h1>
+  <p class="lead">You know C and embedded systems. You understand the basic Buck converter. But when the real loop fails, the bug may live in sensing, sampling, ISR timing, control math, PWM commit timing, or hardware protection. This lab is built to connect those layers.</p>
+  <div class="actions">
+    <a class="button primary" href="#preview">Try 4 free experiments</a>
+    <a class="button" data-buy aria-disabled="true">Early Access · NT$690 one-time</a>
+  </div>
+  <p class="note">The free version shows the method. The full lab trains symptom → hypothesis → measurement → falsification → fix.</p>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">TARGET OUTCOME</p>
+  <h2>Build a mental model you can actually use during debug.</h2>
+  <div class="grid">
+    <article class="card"><h3>Which layer is wrong?</h3><p>Separate physical V/I, analog front end, ADC pin voltage, counts, and reconstructed feedback before blaming the PI loop.</p></article>
+    <article class="card"><h3>When does a control command become real?</h3><p>Trace PWM trigger → ADC conversion → ISR/CLA → shadow write → load event as one deterministic timing chain.</p></article>
+    <article class="card"><h3>What should you measure next?</h3><p>Choose the highest-information measurement before changing code, so debugging becomes falsifiable instead of guesswork.</p></article>
+    <article class="card"><h3>Who owns PWM authority?</h3><p>Understand the difference between software permission and independent hardware veto paths such as CMPSS / Trip Zone.</p></article>
+  </div>
+</div></section>
+
+<section class="block" id="preview"><div class="shell">
+  <p class="eyebrow">PREVIEW 1 · PHYSICS</p>
+  <h2>If only L changes, what happens to inductor ripple?</h2>
+  <div class="grid">
+    <article class="card control">
+      <label for="inductance">Inductance</label>
+      <input id="inductance" type="range" min="100" max="600" step="25" value="200">
+      <div id="physics-result" class="result" aria-live="polite"></div>
+    </article>
+    <article class="card"><h3>Get the direction before the formula.</h3><p>48 → 12 V, 100 kHz, ideal CCM. Increasing L reduces current ripple. This answers a physical energy-flow question; it does not prove closed-loop performance.</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 2 · SENSING</p>
+  <h2>The voltage inside firmware is not the physical voltage.</h2>
+  <div class="grid">
+    <article class="card control">
+      <label for="sense-vout">Vout (V)</label>
+      <input id="sense-vout" type="number" min="1" max="16" step=".1" value="12">
+      <div id="sense-result" class="result" aria-live="polite"></div>
+    </article>
+    <article class="card"><h3>Signal chain</h3><p>This preview uses an 82 kΩ / 20 kΩ divider, 3.3 V reference, and 12-bit ADC. During real firmware debug, keep physical Vout, ADC pin voltage, counts, and reconstructed feedback separate.</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 3 · TIMING</p>
+  <h2>Which event order is physically plausible?</h2>
+  <div class="grid">
+    <article class="card options">
+      <button data-timing="wrong">ISR → PWM SOCA → ADC sample → shadow write</button>
+      <button data-timing="correct">PWM SOCA → ADC sample/convert → ISR/CLA → shadow write → load event</button>
+      <button data-timing="wrong">ADC sample → active PWM changes immediately → ISR → PI</button>
+    </article>
+    <article class="card"><div id="timing-result" class="result" aria-live="polite">Choose an event sequence.</div><p class="note">The free preview checks timing grammar. The full lab goes into delay budget, shadow-load commit, and sample-to-actuate evidence.</p></article>
+  </div>
+</div></section>
+
+<section class="block"><div class="shell">
+  <p class="eyebrow">PREVIEW 4 · UNKNOWN FAULT</p>
+  <h2>DMM says 12 V. Firmware reconstructs 9.6 V. What do you measure next?</h2>
+  <div class="grid">
+    <article class="card options">
+      <button data-fault="pi">Increase PI Kp first</button>
+      <button data-fault="adc">Measure the ADC pin and verify divider / scaling / counts</button>
+      <button data-fault="pwm">Increase switching frequency first</button>
+    </article>
+    <article class="card"><div id="fault-result" class="result" aria-live="polite">Choose the next measurement with the highest information value.</div><p class="note">This is one public challenge. The full version includes faults across sensing, timing, ownership, safety, and control.</p></article>
+  </div>
+</div></section>
+
+<section class="block" id="paid"><div class="shell">
+  <p class="eyebrow">PAID LAB · EARLY ACCESS RELEASE 1</p>
+  <h2>Use the free version to inspect the method. Use the full lab to practice the entire engineering chain.</h2>
+  <div class="grid">
+    <article class="card locked">
+      <h3>Full version includes</h3>
+      <ul>
+        <li>01 Power Physics</li><li>02 Sensing</li><li>03 Feedback</li><li>04 Timing</li>
+        <li>05 Dynamics</li><li>06 Safety</li><li>07 Production Firmware</li><li>08 Evidence</li>
+        <li>full fault bank</li><li>guided workbook</li><li>answer key</li><li>debug checklist</li>
+      </ul>
+    </article>
+    <article class="card">
+      <p class="eyebrow">EARLY ACCESS RELEASE 1</p>
+      <div class="price">NT$690</div>
+      <p>One-time purchase. Download the complete interactive lab bundle, Workbook, Answer Key, fault scenarios, and evidence-driven debug checklist.</p>
+      <div class="actions"><a class="button primary" data-buy aria-disabled="true">Get Early Access</a></div>
+      <p id="checkout-status" class="status" hidden></p>
+      <p class="note"><strong>Support boundary:</strong> this purchase does not include personal project debugging, schematic review, 1-on-1 consulting, or target-board qualification.</p>
+    </article>
+  </div>
+  <p class="truth">This is a training product. Completing the lab does not imply production qualification, BOARD_PASS, hardware certification, or safety certification. Real target/board claims still require target-specific evidence.</p>
+</div></section>
+</main>
+
+<footer><div class="shell">Community Edition exposes only a small preview. The complete training path is delivered separately as the paid Early Access product.</div></footer>
+<script src="../product-config.js"></script>
+<script src="../localized-app.js"></script>
+</body>
+</html>
