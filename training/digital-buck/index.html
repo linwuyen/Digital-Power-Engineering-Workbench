@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="免費 Digital Buck Community Edition：用少量互動實驗看懂 Buck physics、ADC sensing、control timing 與 evidence-driven debug。">
+  <title>Digital Buck Community Edition</title>
+  <link rel="stylesheet" href="./community.css">
+</head>
+<body>
+<header class="top">
+  <div class="shell">
+    <a class="brand" href="../../">Digital Power Engineering Workbench</a>
+    <nav aria-label="頁面導覽">
+      <a href="#preview">免費 Preview</a>
+      <a href="#paid">完整 Lab</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="shell">
+    <p class="eyebrow">FREE COMMUNITY EDITION</p>
+    <h1>先證明你真的想學，再決定要不要買完整 Digital Power Lab。</h1>
+    <p class="lead">這個公開版只留下四個高資訊量 preview：Buck physics、ADC scaling、PWM→ADC→ISR timing，以及 1 個 unknown-fault diagnosis。完整八層課程與 fault bank 不公開。</p>
+    <div class="actions">
+      <a class="button primary" href="#preview">開始免費 Preview</a>
+      <a class="button" data-buy aria-disabled="true">取得完整 Early Access · NT$690</a>
+    </div>
+    <p class="note">Community Edition 不是完整課程，也不提供完整答案庫、production authority lab 或 board-evidence workflow。</p>
+  </div>
+</section>
+
+<section class="block" id="preview">
+  <div class="shell">
+    <p class="eyebrow">PREVIEW 1 · PHYSICS</p>
+    <h2>只改 L，電感 ripple 會怎麼變？</h2>
+    <div class="grid">
+      <article class="card control">
+        <label for="inductance">Inductance</label>
+        <input id="inductance" type="range" min="100" max="600" step="25" value="200">
+        <div id="physics-result" class="result" aria-live="polite"></div>
+      </article>
+      <article class="card">
+        <h3>你要抓到的不是公式，是方向。</h3>
+        <p>48 → 12 V、100 kHz、理想 CCM。L 變大，電流斜率不會變快，所以 ripple 會下降。這一層只回答 physical energy-flow 問題，不代表 closed-loop performance。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="shell">
+    <p class="eyebrow">PREVIEW 2 · SENSING</p>
+    <h2>Physical voltage 進 MCU 前，已經不是同一個數字。</h2>
+    <div class="grid">
+      <article class="card control">
+        <label for="sense-vout">Vout（V）</label>
+        <input id="sense-vout" type="number" min="1" max="16" step=".1" value="12">
+        <div id="sense-result" class="result" aria-live="polite"></div>
+      </article>
+      <article class="card">
+        <h3>Signal chain</h3>
+        <p>這個 preview 固定使用 82 kΩ / 20 kΩ divider、3.3 V reference、12-bit ADC。真正 firmware debug 時，你必須分清楚 physical Vout、ADC pin voltage、counts 和 reconstructed feedback。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="shell">
+    <p class="eyebrow">PREVIEW 3 · TIMING</p>
+    <h2>哪一個事件順序才合理？</h2>
+    <div class="grid">
+      <article class="card options">
+        <button data-timing="wrong">ISR → PWM SOCA → ADC sample → shadow write</button>
+        <button data-timing="correct">PWM SOCA → ADC sample/convert → ISR/CLA → shadow write → load event</button>
+        <button data-timing="wrong">ADC sample → active PWM 立即改變 → ISR → PI</button>
+      </article>
+      <article class="card">
+        <div id="timing-result" class="result" aria-live="polite">先選一個事件順序。</div>
+        <p class="note">免費版只驗證 timing grammar；完整 lab 才會處理 delay budget、shadow-load commit、sample→actuate evidence。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="shell">
+    <p class="eyebrow">PREVIEW 4 · UNKNOWN FAULT</p>
+    <h2>DMM 量到 12 V，但 firmware 重建只有 9.6 V。下一個量測？</h2>
+    <div class="grid">
+      <article class="card options">
+        <button data-fault="pi">先把 PI Kp 調大</button>
+        <button data-fault="adc">先量 ADC pin，核對 divider / scaling / counts</button>
+        <button data-fault="pwm">先提高 switching frequency</button>
+      </article>
+      <article class="card">
+        <div id="fault-result" class="result" aria-live="polite">選你認為資訊量最高的下一步。</div>
+        <p class="note">這只是 1 個公開 challenge。完整版本才有跨 sensing / timing / ownership / safety / control 的 fault bank。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="paid">
+  <div class="shell">
+    <p class="eyebrow">PAID LAB · EARLY ACCESS</p>
+    <h2>免費版停在「看懂方法」；完整版本才讓你把整條 chain 練完。</h2>
+    <div class="grid">
+      <article class="card locked">
+        <h3>完整版本保留</h3>
+        <ul>
+          <li>01 Power Physics</li><li>02 Sensing</li><li>03 Feedback</li><li>04 Timing</li>
+          <li>05 Dynamics</li><li>06 Safety</li><li>07 Production Firmware</li><li>08 Evidence</li>
+          <li>完整 fault bank</li><li>guided workbook</li><li>answer key</li><li>debug checklist</li>
+        </ul>
+      </article>
+      <article class="card">
+        <p class="eyebrow">EARLY ACCESS</p>
+        <div class="price">NT$690</div>
+        <p>付費交付物包含完整 interactive lab bundle、Workbook、Answer Key、8+ fault scenarios 與 evidence-driven debug checklist。</p>
+        <div class="actions"><a class="button primary" data-buy aria-disabled="true">取得 Early Access</a></div>
+        <p id="checkout-status" class="status" hidden></p>
+      </article>
+    </div>
+    <p class="truth">完成這套 lab 不等於 production qualification、BOARD_PASS 或真實產品認證；涉及 target/board 的 claim 仍必須有對應 evidence。</p>
+  </div>
+</section>
+</main>
+
+<footer><div class="shell">Public boundary: this route intentionally exposes only the Community Edition preview. Full paid-source content is not linked from this page.</div></footer>
+
+<script src="./product-config.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
