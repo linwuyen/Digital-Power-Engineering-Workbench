@@ -137,6 +137,29 @@ The original analysis capabilities remain available below the Status views rathe
 
 The mock power-control surface is retained only as a **DEMO / REFERENCE** view. Browser/network commands never own OVP, OCP, OTP, PWM Trip, interlock, emergency safe-off, or other hardware protection authority.
 
+## Digital Buck Community Edition
+
+The public training/acquisition surface is intentionally isolated from the ASR5K console:
+
+```text
+https://linwuyen.github.io/Digital-Power-Engineering-Workbench/training/digital-buck/
+```
+
+It exposes only four previews:
+
+- Buck physics;
+- sensing / ADC scaling;
+- PWM → ADC → ISR/CLA → shadow-load timing;
+- one evidence-driven unknown-fault challenge.
+
+The complete eight-layer C2000 Digital Buck Firmware Lab, answer key, full fault bank, production-authority exercises, and board-evidence workflow are paid-only. The canonical boundary is documented in:
+
+```text
+docs/digital-buck-product-boundary.md
+```
+
+Do not link the public Community Edition back to the historical full `Circuit-Simulation` lab. Hidden links are not an access boundary.
+
 ## Evidence boundary
 
 Workbench output is only as strong as the named inputs behind it:
@@ -166,6 +189,8 @@ node --check static/eng/data_source.js
 node --check static/eng/profiles.js
 node --check static/eng/control_sfra.js
 node --check static/eng/system_tools.js
+node --check training/digital-buck/app.js
+node --check training/digital-buck/product-config.js
 ```
 
 ## Repository policy
