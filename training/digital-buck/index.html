@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="免費 Digital Buck Community Edition：用少量互動實驗看懂 Buck physics、ADC sensing、control timing 與 evidence-driven debug。">
+  <meta name="description" content="免費 Digital Buck Community Edition：用 4 個互動實驗理解 Buck physics、ADC sensing、control timing 與 evidence-driven debug。">
   <title>Digital Buck Community Edition</title>
   <link rel="stylesheet" href="./community.css">
 </head>
@@ -22,13 +22,38 @@
 <section class="hero">
   <div class="shell">
     <p class="eyebrow">FREE COMMUNITY EDITION</p>
-    <h1>先證明你真的想學，再決定要不要買完整 Digital Power Lab。</h1>
-    <p class="lead">這個公開版只留下四個高資訊量 preview：Buck physics、ADC scaling、PWM→ADC→ISR timing，以及 1 個 unknown-fault diagnosis。完整八層課程與 fault bank 不公開。</p>
+    <h1>把 ADC → ISR → PI → PWM → Protection 串成一條你真的能 Debug 的 Digital Power Control Loop。</h1>
+    <p class="lead">如果你已經會 C / MCU、也知道 Buck 基本原理，但實作時常卡在 sampling、timing、feedback scaling、PWM update 或 fault path，這個免費版先讓你用 4 個互動實驗確認這套學習方法適不適合你。</p>
     <div class="actions">
-      <a class="button primary" href="#preview">開始免費 Preview</a>
-      <a class="button" data-buy aria-disabled="true">取得完整 Early Access · NT$690</a>
+      <a class="button primary" href="#preview">開始 4 個免費實驗</a>
+      <a class="button" data-buy aria-disabled="true">完整 Early Access · NT$690</a>
     </div>
-    <p class="note">Community Edition 不是完整課程，也不提供完整答案庫、production authority lab 或 board-evidence workflow。</p>
+    <p class="note">免費版讓你看懂方法；完整 Lab 的目標是讓你練習從症狀 → hypothesis → measurement → falsification → fix，而不是只背 peripheral 設定。</p>
+  </div>
+</section>
+
+<section class="block">
+  <div class="shell">
+    <p class="eyebrow">TARGET OUTCOME</p>
+    <h2>完成完整 Lab 後，你應該能更有系統地回答這些問題。</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>訊號到底在哪一層錯？</h3>
+        <p>分清 physical V/I、AFE/divider、ADC pin、counts、reconstructed feedback，不直接把所有異常都歸咎於 PI。</p>
+      </article>
+      <article class="card">
+        <h3>控制命令何時真的生效？</h3>
+        <p>把 PWM trigger、ADC conversion、ISR/CLA、shadow write、load event 串成 deterministic timing chain。</p>
+      </article>
+      <article class="card">
+        <h3>故障時下一個量測是什麼？</h3>
+        <p>先找最高資訊量 evidence，再改 code；讓 debug 從猜測變成可以反證的工程流程。</p>
+      </article>
+      <article class="card">
+        <h3>Software command 與 hardware veto 誰有權？</h3>
+        <p>理解 RUN、command freshness、sensing validity 與 CMPSS / Trip Zone 等 safety authority 的不同角色。</p>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -43,8 +68,8 @@
         <div id="physics-result" class="result" aria-live="polite"></div>
       </article>
       <article class="card">
-        <h3>你要抓到的不是公式，是方向。</h3>
-        <p>48 → 12 V、100 kHz、理想 CCM。L 變大，電流斜率不會變快，所以 ripple 會下降。這一層只回答 physical energy-flow 問題，不代表 closed-loop performance。</p>
+        <h3>先抓方向，再抓數字。</h3>
+        <p>48 → 12 V、100 kHz、理想 CCM。L 變大，電流 ripple 下降。這一層只回答 physical energy-flow 問題，不代表 closed-loop performance。</p>
       </article>
     </div>
   </div>
@@ -80,7 +105,7 @@
       </article>
       <article class="card">
         <div id="timing-result" class="result" aria-live="polite">先選一個事件順序。</div>
-        <p class="note">免費版只驗證 timing grammar；完整 lab 才會處理 delay budget、shadow-load commit、sample→actuate evidence。</p>
+        <p class="note">免費版只驗證 timing grammar；完整 Lab 才會處理 delay budget、shadow-load commit、sample→actuate evidence。</p>
       </article>
     </div>
   </div>
@@ -106,11 +131,11 @@
 
 <section class="block" id="paid">
   <div class="shell">
-    <p class="eyebrow">PAID LAB · EARLY ACCESS</p>
-    <h2>免費版停在「看懂方法」；完整版本才讓你把整條 chain 練完。</h2>
+    <p class="eyebrow">PAID LAB · EARLY ACCESS RELEASE 1</p>
+    <h2>免費版看方法；完整版本練整條工程 chain。</h2>
     <div class="grid">
       <article class="card locked">
-        <h3>完整版本保留</h3>
+        <h3>完整版本包含</h3>
         <ul>
           <li>01 Power Physics</li><li>02 Sensing</li><li>03 Feedback</li><li>04 Timing</li>
           <li>05 Dynamics</li><li>06 Safety</li><li>07 Production Firmware</li><li>08 Evidence</li>
@@ -118,19 +143,20 @@
         </ul>
       </article>
       <article class="card">
-        <p class="eyebrow">EARLY ACCESS</p>
+        <p class="eyebrow">EARLY ACCESS RELEASE 1</p>
         <div class="price">NT$690</div>
-        <p>付費交付物包含完整 interactive lab bundle、Workbook、Answer Key、8+ fault scenarios 與 evidence-driven debug checklist。</p>
+        <p>一次購買，下載完整 interactive lab bundle、Workbook、Answer Key、fault scenarios 與 evidence-driven debug checklist。</p>
         <div class="actions"><a class="button primary" data-buy aria-disabled="true">取得 Early Access</a></div>
         <p id="checkout-status" class="status" hidden></p>
+        <p class="note"><strong>支援邊界：</strong>NT$690 不包含個人專案除錯、schematic review、1-on-1 consulting 或替你的 target board 做 qualification。</p>
       </article>
     </div>
-    <p class="truth">完成這套 lab 不等於 production qualification、BOARD_PASS 或真實產品認證；涉及 target/board 的 claim 仍必須有對應 evidence。</p>
+    <p class="truth">這是訓練與實驗產品。完成 Lab 不等於 production qualification、BOARD_PASS 或真實產品認證；涉及 target/board 的 claim 仍必須有對應 evidence。</p>
   </div>
 </section>
 </main>
 
-<footer><div class="shell">Public boundary: this route intentionally exposes only the Community Edition preview. Full paid-source content is not linked from this page.</div></footer>
+<footer><div class="shell">Community Edition intentionally exposes only a small preview. The complete training path is delivered separately as the paid Early Access product.</div></footer>
 
 <script src="./product-config.js"></script>
 <script src="./app.js"></script>
