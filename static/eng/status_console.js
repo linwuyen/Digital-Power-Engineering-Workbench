@@ -19,6 +19,48 @@
     return 'status-unknown';
   };
 
+  const formatAge = seconds => {
+    if (seconds == null || !Number.isFinite(Number(seconds))) return '—';
+    const value = Math.max(0, Math.floor(Number(seconds)));
+    if (value < 60) return `${value}s`;
+    if (value < 3600) return `${Math.floor(value / 60)}m`;
+    if (value < 86400) return `${Math.floor(value / 3600)}h ${Math.floor((value % 3600) / 60)}m`;
+    return `${Math.floor(value / 86400)}d ${Math.floor((value % 86400) / 3600)}h`;
+  };
+
+  function renderFreshnessBanner(model) {
+    const banner = D.$('statusFreshnessBanner');
+    if (!banner) return;
+    const freshness = model.freshness || {};
+    const status = freshness.status || model.mode || 'UNKNOWN';
+    const generated = model.generated_at || 'unknown time';
+    const age = formatAge(freshness.age_seconds);
+
+    if (model.mode === 'LIVE') {
+      banner.className = 'truth-boundary truth-ok';
+      banner.innerHTML = `<strong>LIVE OWNER QUERY</strong><span>${esc(D.text(
+        '目前頁面由本機後端即時查詢 owner repositories；這只代表資料來源是 LIVE，不代表所有 qualification gate 已 PASS。',
+        'The local backend queried the owner repositories live. LIVE describes source freshness only; it does not mean every qualification gate passed.'
+      ))}</span>`;
+      return;
+    }
+
+    if (status === 'STALE') {
+      banner.className = 'truth-boundary truth-pending';
+      banner.innerHTML = `<strong>PUBLIC SNAPSHOT · STALE</strong><span>${esc(D.text(
+        `此頁不是目前 firmware truth。公開快照產生於 ${generated}，目前約 ${age}；請以 owner repositories 的 LIVE exact-SHA evidence 為準。`,
+        `This is not current firmware truth. The public snapshot was generated at ${generated} and is about ${age} old; use LIVE exact-SHA evidence from the owner repositories for current status.`
+      ))}</span>`;
+      return;
+    }
+
+    banner.className = 'truth-boundary truth-governance';
+    banner.innerHTML = `<strong>PUBLIC SNAPSHOT · NOT LIVE</strong><span>${esc(D.text(
+      `目前顯示 sanitized derived snapshot（產生於 ${generated}，約 ${age}）。它不具工程 authority，也不能取代 owner repositories。`,
+      `Showing a sanitized derived snapshot generated at ${generated} (about ${age} old). It has no engineering authority and cannot replace the owner repositories.`
+    ))}</span>`;
+  }
+
   function markSnapshotAge(model) {
     if (model.mode !== 'SNAPSHOT' || !model.generated_at) return model;
     const generated = Date.parse(model.generated_at);
@@ -87,8 +129,9 @@
 
     D.$('statusHealth').innerHTML = `
       <div><span>Mode</span><strong class="${statusClass(freshness.status)}">${esc(freshness.status || model.mode)}</strong></div>
-      <div><span>Generated / queried</span><strong>${esc(model.generated_at)}</strong></div>
-      <div><span>Age</span><strong>${freshness.age_seconds == null ? '—' : `${freshness.age_seconds}s`}</strong></div>
+      <div><span>${model.mode === 'LIVE' ? 'Queried at' : 'Snapshot generated'}</span><strong>${esc(model.generated_at)}</strong></div>
+      <div><span>Age</span><strong>${esc(formatAge(freshness.age_seconds))}</strong></div>
+      <div><span>Authority</span><strong>${model.mode === 'LIVE' ? 'OWNER QUERY' : 'DERIVED VIEW ONLY'}</strong></div>
       <div><span>Evidence SHA match</span><strong>${identity.evidence_sha_match === true ? 'YES' : identity.evidence_sha_match === false ? 'NO / UNKNOWN' : 'UNKNOWN'}</strong></div>`;
   }
 
@@ -128,6 +171,7 @@
 
   function render(model) {
     window.DPWE.status = model;
+    renderFreshnessBanner(model);
     renderOverview(model);
     renderQualification(model);
     renderEvidence(model);

@@ -35,6 +35,7 @@
       <section id="status" class="panel active">
         <div class="panel-head"><div><div class="eyebrow">IDENTITY → EVIDENCE → TRUST</div><h2 data-eng-zh="ASR5K 工程狀態" data-eng-en="ASR5K Engineering Status">ASR5K 工程狀態</h2></div><span id="statusMode" class="badge">LOADING</span></div>
         <div class="status-hero card"><div><span>Question</span><strong data-eng-zh="現在 ASR5K 到底能不能相信？" data-eng-en="Can the current ASR5K state be trusted?">現在 ASR5K 到底能不能相信？</strong></div><p>Exact identity first. Missing evidence stays UNKNOWN.</p></div>
+        <div id="statusFreshnessBanner" class="truth-boundary truth-governance"><strong>STATUS LOADING</strong><span>Current source identity and freshness have not been resolved yet.</span></div>
         <h3 class="section-heading">PRODUCT BASELINE</h3><div id="statusBaseline" class="status-grid card"></div>
         <h3 class="section-heading">QUALIFICATION</h3><div id="statusQualification" class="gate-grid"></div>
         <div class="status-columns">
@@ -103,5 +104,6 @@
   <div id="toast" class="toast"></div>
   <script src="./app.js"></script>
   <script src="./i18n.js"></script>
+  <script src="./eng/loader.js"></script>
 </body>
 </html>
