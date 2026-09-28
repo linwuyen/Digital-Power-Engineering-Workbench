@@ -12,12 +12,22 @@ class StatusFrontendTests(unittest.TestCase):
         self.assertIn('data-panel="measurement"', html)
         self.assertIn('data-panel="control"', html)
         self.assertIn('data-panel="state"', html)
+        self.assertEqual(html.count('src="./eng/loader.js"'), 1)
+        self.assertIn('id="statusFreshnessBanner"', html)
 
     def test_status_loader_has_live_then_snapshot_fallback(self):
         js = (ROOT / "static" / "eng" / "status_console.js").read_text(encoding="utf-8")
         self.assertIn("/api/status/summary", js)
         self.assertIn("../engineering_data/status/status_snapshot.json", js)
         self.assertNotIn("ASR5K_READ_TOKEN", js)
+
+    def test_status_freshness_ux_names_authority_and_staleness(self):
+        js = (ROOT / "static" / "eng" / "status_console.js").read_text(encoding="utf-8")
+        self.assertIn("LIVE OWNER QUERY", js)
+        self.assertIn("PUBLIC SNAPSHOT · NOT LIVE", js)
+        self.assertIn("PUBLIC SNAPSHOT · STALE", js)
+        self.assertIn("DERIVED VIEW ONLY", js)
+        self.assertIn("renderFreshnessBanner(model)", js)
 
     def test_remote_is_not_primary_nav(self):
         html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
